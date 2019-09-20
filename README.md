@@ -21,4 +21,4 @@ and keeping track of all the files can get tiresome.*
 > *WhatAnApp - This bot will give suggestions for the appropriate programs to support a certain file extension and download the same for you*
 
 > *RuleItOut - This bot will accept rules from the user. For ex. Move all files with extension .jpeg and .png to a folder
-called Images, manage file renaming,remove disallowed file types from collaborative directories *
+called Images, manage file renaming,remove disallowed file types from collaborative directories*
