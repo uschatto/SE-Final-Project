@@ -25,4 +25,4 @@ and keeping track of all the files can get tiresome.*
 > *RuleItOut - This bot will accept rules from the user. For ex. Move all files with extension .jpeg and .png to a folder
 called Images, manage file renaming,remove disallowed file types from collaborative directories*
 
-> *BackUPIt - This bot will make regular automatic backups of shared files to the web services like DropBox or Google Drive and keep the data safe.
+> *BackUPIt - This bot will make regular automatic backups of shared files to the web services like DropBox or Google Drive and keep the data safe.*
