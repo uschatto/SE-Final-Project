@@ -16,7 +16,7 @@ type can consume a lot of your time.*
 > *As an avid user of the Internet your Downloads folder can get cluttered with different types of files, folders, tar balls etc. Managing 
 and keeping track of all the files can get tiresome.*
 
-> *System halts or hangs,accidental removal or damage to files can result in loss of precious data.
+> *System halts or hangs,accidental removal or damage to files can result in loss of precious data.*
 
 
 **BOT DESCRIPTION**
