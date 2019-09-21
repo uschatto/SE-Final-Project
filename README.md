@@ -25,4 +25,9 @@ and keeping track of all the files can get tiresome.*
 > *RuleItOut - This bot will accept rules from the user. For ex. Move all files with extension .jpeg and .png to a folder
 called Images,remove disallowed file types from collaborative directories.*
 
-> *BackUPIt - This bot will make regular automatic backups of shared files to the web services like DropBox or Google Drive and keep the data safe.*
+> *BackUPIt - Automatic backups of files shared*
+
+    This bot will make regular automatic backups of shared files to the web services like DropBox or Google Drive and
+    keep the data safe.Using slack as a platform, this bot will export files from private or public channels to these 
+    web storage services.Users can chose which channels to include or exclude.Bot will also be customizable to set 
+    periods for automatic backups.
