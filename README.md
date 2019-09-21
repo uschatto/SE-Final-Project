@@ -27,7 +27,15 @@
 
 
 **BOT DESCRIPTION**
-> *WhatAnApp - This bot will give suggestions for the appropriate programs to support a certain file extension and download the same for you*
+> *WhatAnApp - Searches and installs the best app for a particular file extension*
+
+    If you have used windows, you must be aware of the feature called "Look for an app in the Store". On encountering 
+    an unknown file extension, the first thing that comes to our mind is to google what application can support this 
+    file type. Very recent versions of Windows have off-loaded this task to do this search of an appropriate application 
+    for you and provide you with the suggestions. After which you can go ahead and install that application and set it as 
+    the default program for that file type.
+    Our bot works on this idea where it keeps a watch on the downloaded file types, looks up the internet for the best 
+    program to support it and installs the same for you without any manual intervention.
 
 > *RuleItOut - This bot will accept rules from the user. For ex. Move all files with extension .jpeg and .png to a folder
 called Images,remove disallowed file types from collaborative directories.*
