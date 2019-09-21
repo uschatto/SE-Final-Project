@@ -9,9 +9,14 @@
  *Sruthi Kannan - skannan5*
 
  *Udita Chattopadhyay - uschatto*
-
+ 
+ 
+ (We had three different ideas and they are numbered as 1,2,3 below)
+ 
+ 
 **PROBLEM STATEMENT**
-1) There are times when certain files would not auto open and the computer might not be able to find a suitable application to open the files. Finding the right program to open such files can consume a lot of time. 
+1) While downloading files and viewing websites, we meet up with many file formats of which some are obscure and might need a special program to open it. There are times when certain files would not auto open and the computer might not be able to find a suitable application to open it. Finding the right program to open such files can consume a lot of time and it can be a little cumbersome when there is no effective method to get this done.
+
 
 2) As an avid user of the Internet, I wonder how many times people move files from Downloads to a specific document folder to make it more organized or convert movies that are downloaded, to a specific playable format by your multimedia players. Basically, the Downloads folder can get cluttered with different types of files, folders, tar balls etc. It might not be easy to search or find a file. After a point, it gets difficult to manage and track all the files that are present. 
 
