@@ -31,14 +31,20 @@
 
     If you have used windows, you must be aware of the feature called "Look for an app in the Store". On encountering 
     an unknown file extension, the first thing that comes to our mind is to google what application can support this 
-    file type. Very recent versions of Windows have off-loaded this task to do this search of an appropriate application 
-    for you and provide you with the suggestions. After which you can go ahead and install that application and set it as 
-    the default program for that file type.
-    Our bot works on this idea where it keeps a watch on the downloaded file types, looks up the internet for the best 
-    program to support it and installs the same for you without any manual intervention.
+    file type. Very recent versions of Windows have off-loaded this task to do this search of an appropriate 
+    application for you and provide you with the suggestions. After which you can go ahead and install that 
+    application and set it as the default program for that file type.
+    Our bot works on this idea where it keeps a watch on the downloaded file types, looks up the internet for the 
+    best program to support it and installs the same for you without any manual intervention.
 
-> *RuleItOut - This bot will accept rules from the user. For ex. Move all files with extension .jpeg and .png to a folder
-called Images,remove disallowed file types from collaborative directories.*
+> *RuleItOut - Create rules to organize an otherwise disorganized directory*
+
+    Remember the cool feature of Microsoft Outlook which allows you to create rules to move, flag, respond to email 
+    messages automatically, play sounds, move messages to folders based on a certain criteria, or even display new 
+    item alerts. Our bot will accept rules from the user and based on the same will organize a disorganized directory 
+    such as Downloads folder. For example, the user can write a rule such that all files having file extensions such 
+    as .png and .jpeg will be moved to a folder called Images. We can also extend this feature to remove or flag any 
+    disallowed file types.
 
 > *BackUPIt - Automatic backups of files shared*
 
