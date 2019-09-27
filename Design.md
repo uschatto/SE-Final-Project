@@ -58,6 +58,7 @@ Image scanned for inappropriate content:
 
 ## **Architecture Design**
 
-<img width="583" alt="Design" src="https://media.github.ncsu.edu/user/10694/files/8a40a580-e0ac-11e9-8975-4801efd23818">
-
+<p align="center">
+<img width="600" border="5" src="https://media.github.ncsu.edu/user/10694/files/8a40a580-e0ac-11e9-8975-4801efd23818">
+</p>
 
