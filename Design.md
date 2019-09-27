@@ -115,7 +115,10 @@ SecBot needs a database to store the reponses collected from VirusTotal API and 
 
 ## **Architecture Patterns**
 
-**Object-Oriented Pattern:**
+**Object-Oriented Pattern**
+
 The bot will take the slack event(file or image shared) as an input, and send the file or image to the relevant API for checking. Polymorphic design helps providing a generic detection interface while delegating the request to relevant API module. It also enables easy addition of more module and tools in future.
 
+**Publish and Subscribe Pattern**
 
+SecBot will scan for virus and inappropriate content whenever a file and an image is uploaded respectively. In our case, Slack notifies SecBot whenever a file or an image is uploaded. Then, SecBot scans the uploaded file and gives a feedback regarding virus or inappropriate content.
