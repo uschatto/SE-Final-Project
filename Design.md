@@ -113,6 +113,26 @@ This API is used to send emails to the appropriate teams.The daily reports gener
 
 SecBot needs a database to store the reponses collected from VirusTotal API and Moderate content API. Results collected here are used to generate a daily report. 
 
+### Virus Scanning
+
+<p align="center">
+<img width="598" alt="Diagram 1" src="https://media.github.ncsu.edu/user/10694/files/4e075680-e139-11e9-84d3-22ca026de079">\
+</p>
+
+### Image content Scanning
+
+<p align="center">
+<img width="594" alt="Diagram 2" src="https://media.github.ncsu.edu/user/10694/files/52cc0a80-e139-11e9-83c1-d03dce6444ba">
+</p>
+
+### Reporting with Gmail
+
+<p align="center">
+<img width="617" alt="Diagram 3" src="https://media.github.ncsu.edu/user/10694/files/5b244580-e139-11e9-8718-ed0f92a551e4">
+</p>
+
+
+
 ## **Architecture Patterns**
 
 **Object-Oriented Pattern**
@@ -122,3 +142,6 @@ The bot will take the slack event(file or image shared) as an input, and send th
 **Publish and Subscribe Pattern**
 
 SecBot will scan for virus and inappropriate content whenever a file and an image is uploaded respectively. In our case, Slack notifies SecBot whenever a file or an image is uploaded. Then, SecBot scans the uploaded file and gives a feedback regarding virus or inappropriate content.
+
+
+
