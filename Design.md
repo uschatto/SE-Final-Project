@@ -113,5 +113,9 @@ This API is used to send emails to the appropriate teams.The daily reports gener
 
 SecBot needs a database to store the reponses collected from VirusTotal API and Moderate content API. Results collected here are used to generate a daily report. 
 
+## **Architecture Patterns**
+
+**Object-Oriented Pattern:**
+The bot will take the slack event(file or image shared) as an input, and send the file or image to the relevant API for checking. Polymorphic design helps providing a generic detection interface while delegating the request to relevant API module. It also enables easy addition of more module and tools in future.
 
 
