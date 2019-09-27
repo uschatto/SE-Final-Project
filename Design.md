@@ -71,3 +71,29 @@ Image scanned for inappropriate content:
 <img width="600" border="5" src="https://media.github.ncsu.edu/user/10694/files/8a40a580-e0ac-11e9-8975-4801efd23818">
 </p>
 
+### Components
+
+The architectural components that are involved with SecBot are as follows,
+
+**1) Slack API**
+
+The platform our bot is embedded in is Slack. This is the interface in which the users will be communicating with one another and the bot as well.
+
+**2) VirusTotal API**
+
+This is the API our bot uses to scan the files that are uploaded on Slack. The corrupted files are removed by SecBot.
+
+**3) ModerateContent API**
+
+This API is used to identify images with inappropriate content from adult to violent. Such images are then removed by SecBot.
+
+**4) Gmail API**
+
+This API is used to send emails to the appropriate teams.The daily reports generated after virus scans are sent to the IT team and incidents involving inappropriate images are reported to the HR.
+
+**5) Database**
+
+SecBot needs a database to store the reponses collected from VirusTotal API and Moderate content API. Results collected here are used to generate a daily report. 
+
+
+
