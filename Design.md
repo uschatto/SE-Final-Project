@@ -3,9 +3,13 @@
 
 ## **Bot Description**
 
+<p align="justify">Every person, team and organization deserves and expects their data to be secure and confidential. Safeguarding this data is a critical responsibility that we try to achieve via our bot. Whenever a user uploads a file to the slack channel, SecBot immediately scans the file,using VirusTotal API, to check if it is corrupted. If the file is corrupted, SecBot removes the file from the slack channel. Whenever a user uploads an image to the slack channel, instead of reviewing all the images uploaded by the user manually, the ModerateContent's API flags inappropriate images automatically and returns an appropriate feedback. This feedback, if not good, is reported to the HR.</p>
+
+<p align="justify">It is time consuming and taxing to check every file and image manually for malware and inappropriate content respectively. By automating this task, the file is automatically checked for malware when it's uploaded and this helps in preventing the malware from spreading within the organization. Similarly, automating the task of checking if an image is inappropriate and reporting to HR ensures that such incidents are always brought to light. SecBot is continuously monitoring, auditing, and sharing the audit results with senior management. All findings are then tracked to resolution in a timely manner. By automating the identification, remediation, and archiving of all inappropriate and malicious content posted within Slack, SecBot helps an organization to  enjoy all the benefits of Slack without worrying about regulatory or security concerns.</p>
+
 ## **Use Cases**
 
-Use Case : Check if a file is corrupted
+**Use Case 1 : Check if a file is corrupted**
 ```
 1 Preconditions:
 Users must have VirusTotal API tokens and bot must be a part of the slack channel for which you need document scanning.
@@ -19,7 +23,7 @@ User will upload a file [S1], the bot will scan the file for malware[S2]. Bot wi
 [E1] File is not corrupted
 
 ```                 
-Use case : Check if an image is inappropriate
+**Use case 2 : Check if an image is inappropriate**
 ```
 1 Preconditions:
 User must have ModerateContent API and bot must be a part of the slack channel
@@ -37,7 +41,7 @@ User will upload an image [S1], the bot will scan the file to check [S2]. Bot wi
 ## **Design Sketches**
 
 ### **Wireframe**
-- Scanning for malware
+- **Scanning for malware**
 
 No malware is detected:
 ![SE-1](https://media.github.ncsu.edu/user/10647/files/a859d600-e0ab-11e9-9e63-5cc5bbf5074c)
@@ -47,7 +51,7 @@ Malware is detected:
 
 ![SE-3](https://media.github.ncsu.edu/user/10647/files/c0315a00-e0ab-11e9-8b07-be6a53372d43)
 
-- Scanning for inappropriate content 
+- **Scanning for inappropriate content** 
 
 Image scanned for inappropriate content:
 ![SE-4](https://media.github.ncsu.edu/user/10647/files/c58ea480-e0ab-11e9-9e90-58611b6cb0f8)
