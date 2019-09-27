@@ -7,6 +7,8 @@
 
 <p align="justify">It is time consuming and taxing to check every file and image manually for virus and inappropriate content respectively. By automating this task, the file is automatically checked for virus when it's uploaded and this helps in preventing the virus from spreading within the organization. Similarly, automating the task of checking if an image is inappropriate and reporting to HR ensures that such incidents are always brought to light. SecBot is continuously monitoring, auditing, and sharing the audit results with senior management. All findings are then tracked to resolution in a timely manner. By automating the identification, remediation, and archiving of all inappropriate and malicious content posted within Slack, SecBot helps an organization to  enjoy all the benefits of Slack without worrying about regulatory or security concerns.</p>
 
+*Be Assured. Be Secured.*
+
 ## **Use Cases**
 
 **Use Case 1 : Check if a file is corrupted**
@@ -94,23 +96,33 @@ Image scanned for inappropriate content:
 The architectural components that are involved with SecBot are as follows,
 
 **1) Slack API**
-
+<p align="right">
+<img src="https://media.github.ncsu.edu/user/12214/files/1f8b7a80-e13d-11e9-8efb-fbac7452d41a" width="20" height="20">
+</p>
 The platform our bot is embedded in is Slack. This is the interface in which the users will be communicating with one another and the bot as well.
 
 **2) VirusTotal API**
-
+<p align="right">
+<img src="https://media.github.ncsu.edu/user/12214/files/8f036900-e141-11e9-9984-7e2275b8781c" width="70" height="20">
+</p>
 This is the API our bot uses to scan the files that are uploaded on Slack. The corrupted files are removed by SecBot.
 
 **3) ModerateContent API**
-
+<p align="right">
+<img src="https://media.github.ncsu.edu/user/12214/files/bce8ad80-e141-11e9-9cd1-2070b81d6731" width="80" height="30">
+</p>
 This API is used to identify images with inappropriate content from adult to violent. Such images are then removed by SecBot.
 
 **4) Gmail API**
-
+<p align="right">
+<img src="https://media.github.ncsu.edu/user/12214/files/25d02580-e142-11e9-8475-b0e3254cbf44" width="30" height="20">
+</p>
 This API is used to send emails to the appropriate teams.The daily reports generated after virus scans are sent to the IT team and incidents involving inappropriate images are reported to the HR.
 
 **5) Database**
-
+<p align="right">
+<img src="https://media.github.ncsu.edu/user/12214/files/616aef80-e142-11e9-9959-cd04bd861570" width="30" height="30">
+</p>
 SecBot needs a database to store the reponses collected from VirusTotal API and Moderate content API. Results collected here are used to generate a daily report. 
 
 ### Virus Scanning
