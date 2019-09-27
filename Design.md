@@ -4,6 +4,35 @@
 
 ## **Use Cases**
 
+Use Case : Check if a file is corrupted
+```
+1 Preconditions:
+Users must have VirusTotal API tokens and bot must be a part of the slack channel for which you need document scanning.
+2 Mainflow
+User will upload a file [S1], the bot will scan the file for malware[S2]. Bot will warn and remove the file if it is corrupted [S3].
+3 Subflows:
+[S1] User will upload a file to the slack channel
+[S2] Bot will scan file to check if there’s any malware present 
+[S3] Bot will report and remove the corrupted file using VirusTotal API
+4 Alternate Flows:
+[E1] File is not corrupted
+
+```                 
+Use case : Check if an image is inappropriate
+```
+1 Preconditions:
+User must have ModerateContent API and bot must be a part of the slack channel
+2 Mainflow
+User will upload an image [S1], the bot will scan the file to check [S2]. Bot will warn and remove the file if it is corrupted [S3].
+3 Subflows:
+[S1] User will upload an image to the slack channel
+[S2] Bot will scan file to check if the content is inappropriate
+[S3] Bot will warn and remove the inappropriate image, using ModerateContent API
+4 Alternate Flows:
+[E1] Image is appropriate
+```
+
+
 ## **Design Sketches**
 
 ### **Wireframe**
@@ -26,4 +55,9 @@ Image scanned for inappropriate content:
 
 
 ### **Storyboard**
+
+## **Architecture Design**
+
+<img width="583" alt="Design" src="https://media.github.ncsu.edu/user/10694/files/8a40a580-e0ac-11e9-8975-4801efd23818">
+
 
