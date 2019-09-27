@@ -122,7 +122,7 @@ SecBot needs a database to store the reponses collected from VirusTotal API and 
 ### Image content Scanning
 
 <p align="center">
-<img width="594" alt="Diagram 2" src="https://media.github.ncsu.edu/user/10694/files/52cc0a80-e139-11e9-83c1-d03dce6444ba">
+<img width="756" alt="updated!!!" src="https://media.github.ncsu.edu/user/10694/files/db987580-e13c-11e9-8e26-076fc154b9e4">
 </p>
 
 ### Reporting with Gmail
