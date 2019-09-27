@@ -86,7 +86,7 @@ Image scanned for inappropriate content:
 ## **Architecture Design**
 
 <p align="center">
-<img width="600" border="5" src="https://media.github.ncsu.edu/user/10694/files/8a40a580-e0ac-11e9-8975-4801efd23818">
+<img width="840" alt="ARCH updated" src="https://media.github.ncsu.edu/user/10694/files/60ce5b00-e13a-11e9-88f4-ccb695b9317e">
 </p>
 
 ### Components
@@ -116,7 +116,7 @@ SecBot needs a database to store the reponses collected from VirusTotal API and 
 ### Virus Scanning
 
 <p align="center">
-<img width="598" alt="Diagram 1" src="https://media.github.ncsu.edu/user/10694/files/4e075680-e139-11e9-84d3-22ca026de079">\
+<img width="748" alt="Updated diagram" src="https://media.github.ncsu.edu/user/10694/files/2e246280-e13a-11e9-8261-fc1cbfde40c7">
 </p>
 
 ### Image content Scanning
