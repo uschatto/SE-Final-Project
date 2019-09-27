@@ -56,6 +56,14 @@ Image scanned for inappropriate content:
 
 ### **Storyboard**
 
+<p align="center">
+<img src="https://media.github.ncsu.edu/user/12215/files/53b95980-e0b1-11e9-8bf7-f60ccaa1e069" height="600" width="600">
+</p>
+
+<p align="center">
+<img src="https://media.github.ncsu.edu/user/12215/files/8ca4fe80-e0b0-11e9-8670-e5b1a71a5aa6" height="350" width="600" >
+</p>
+
 ## **Architecture Design**
 
 <p align="center">
