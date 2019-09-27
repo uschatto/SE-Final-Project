@@ -13,7 +13,7 @@
 ```
 1 Preconditions:
 Users must have VirusTotal API tokens and bot must be a part of the slack channel for which you need document scanning.
-2 Mainflow
+2 Mainflow:
 User will upload a file [S1], the bot will scan the file for malware[S2]. Bot will warn and remove the file if it is corrupted [S3].
 3 Subflows:
 [S1] User will upload a file to the slack channel
@@ -27,7 +27,7 @@ User will upload a file [S1], the bot will scan the file for malware[S2]. Bot wi
 ```
 1 Preconditions:
 User must have ModerateContent API and bot must be a part of the slack channel
-2 Mainflow
+2 Mainflow:
 User will upload an image [S1], the bot will scan the file to check [S2]. Bot will warn and remove the file if it is corrupted [S3].
 3 Subflows:
 [S1] User will upload an image to the slack channel
@@ -37,6 +37,20 @@ User will upload an image [S1], the bot will scan the file to check [S2]. Bot wi
 [E1] Image is appropriate
 ```
 
+**Use case 3 : Reporting to the HR and IT Team**
+```
+1 Preconditions:
+User must have ModerateContent API and bot must be a part of the slack channel
+2 Mainflow:
+User will upload an image or file [S1], the bot will scan the file or image uploaded to check for any virus or inappropriate content [S2]. Bot will send an email to the HR if any inappropriate content was found [S3]. Bot will also send daily reports to the IT team for all the viruses [S4].
+3 Subflows:
+[S1] User will upload an image or file to the slack channel
+[S2] Bot will scan file or the image uploaded to check for any virus or inappropriate content.
+[S3] Bot will send an email to the HR if any inappropriate content was shared on the slack channel.The email will have details of the person sharing such content.
+[S4] Bot will also send daily reports to the IT team for the viruses found with the details of the concerned person sending the file whose system might need to be checked.
+4 Alternate Flows:
+[E1] Image or file uploaded is appropriate
+```
 
 ## **Design Sketches**
 
