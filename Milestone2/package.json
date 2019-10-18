@@ -4,7 +4,7 @@
   "description": "Be Assured.Be Secured.",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js"
+    "start": "node bot.js"
   },
   "author": "Udita, Ramandeep, Niveditha, Sruthi",
   "license": "ISC",
