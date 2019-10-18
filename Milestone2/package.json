@@ -1,0 +1,15 @@
+{
+  "name": "secbot",
+  "version": "1.0.0",
+  "description": "Be Assured.Be Secured.",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "author": "Udita, Ramandeep, Niveditha, Sruthi",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^8.1.0",
+    "slackbots": "^1.2.0"
+  }
+}
