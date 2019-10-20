@@ -46,6 +46,7 @@ bot.on('message', (data) => {
 		if ( (data["files"][0]['name']).match(/corrupted/i) ){
 			bot.postMessageToChannel('general', "The image is corrupted");
 			file = data["files"][0]['id'];      
+
 			user_id = data["files"][0]['user']; 
 			file_name = data["files"][0]['name'];
 			
@@ -56,6 +57,8 @@ bot.on('message', (data) => {
 			//To report logs 
 			reportLogs(Report);				
 		}
+
+
 
 		//Use Case 2
 		//if ( image_types.includes(data["files"][0]['filetype'].toLowerCase()) ) {		
@@ -81,6 +84,25 @@ function listNameofUser(){
 
 	});
 }
+
+//To log the entries in a csv file 
+async function createReport(file_name){
+try{
+	const result = await listNameofUser();
+	writer = csvWriter({sendHeaders: false});
+	writer.pipe(fs.createWriteStream(csvFilename, {flags: 'a'}));
+	writer.write({
+		header1: result,
+		header2: file_name		
+	});
+	writer.end();
+}catch (error) {
+       	console.error('ERROR:');
+        console.error(error);
+    	}
+}
+
+
 
 //To get the ID of the primary owner
 function listIdofOwner(){
