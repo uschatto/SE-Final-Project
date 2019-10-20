@@ -1,13 +1,30 @@
 require('dotenv').config();
 request = require('request');
-
+const fs = require('fs');
 const SlackBot = require('slackbots');
+
 const image_types = ["jpeg" , "jpg" , "jpe" , "jfif" , "jif" , "jfi" , "png" , "svg" , "webp" , "tiff" , "tif" , "psd" , "raw" , "arw" , "cr2" , "nrw" , "k25" , "bmp"] 
 
 const bot = new SlackBot({
 	token: process.env.SLACK_BOT_TOKEN,
 	name: 'SecBot'
 });
+
+
+var csvWriter = require('csv-write-stream');
+var writer = csvWriter({sendHeaders: false}); //Instantiate var
+var csvFilename = "report.csv";
+
+// If CSV file does not exist, create it and add the headers
+if (!fs.existsSync(csvFilename)) {
+  writer = csvWriter({sendHeaders: false});
+  writer.pipe(fs.createWriteStream(csvFilename));
+  writer.write({
+    header1: 'MEMBER NAME',
+    header2: 'FILE NAME'
+  });
+  writer.end();
+} 
 
 //Start Handler
 bot.on('start', () => {
@@ -26,6 +43,18 @@ bot.on('message', (data) => {
 			if ( (data["files"][0]['name']).match(/corrupted/i) ){
 				bot.postMessageToChannel('general', "The image is corrupted");
 				file=data["files"][0]['id'];
+                                iduser=data["files"][0]['user'] 
+				token=process.env.SLACK_BOT_TOKEN;
+				
+
+				writer = csvWriter({sendHeaders: false});
+				writer.pipe(fs.createWriteStream(csvFilename, {flags: 'a'}));
+				writer.write({
+				  header1: '',
+				  header2:  data["files"][0]['name']  		
+				});
+				writer.end();
+
 				request.post({
     					url: 'https://slack.com/api/files.delete',
     					form: {
