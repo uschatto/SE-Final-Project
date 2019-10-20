@@ -5,7 +5,7 @@ const SlackBot = require('slackbots');
 const image_types = ["jpeg" , "jpg" , "jpe" , "jfif" , "jif" , "jfi" , "png" , "svg" , "webp" , "tiff" , "tif" , "psd" , "raw" , "arw" , "cr2" , "nrw" , "k25" , "bmp"] 
 
 const bot = new SlackBot({
-	token: process.env.USER_BOT_TOKEN,
+	token: process.env.SLACK_BOT_TOKEN,
 	name: 'SecBot'
 });
 
@@ -29,7 +29,7 @@ bot.on('message', (data) => {
 				request.post({
     					url: 'https://slack.com/api/files.delete',
     					form: {
-      						token: process.env.SLACK_BOT_TOKEN,
+      						token: process.env.SLACK_ACCESS_TOKEN,
     						file: file	
 				}
 				});
@@ -38,6 +38,15 @@ bot.on('message', (data) => {
 		else {
 			if ( (data["files"][0]['name']).match(/corrupted/i) ) {
 				bot.postMessageToChannel('general', "The file is corrupted");
+				file=data["files"][0]['id'];
+                                request.post({
+                                        url: 'https://slack.com/api/files.delete',
+                                        form: {
+                                                token: process.env.SLACK_ACCESS_TOKEN,
+                                                file: file
+                                }
+                                });
+
 			}
 		}
 	}
