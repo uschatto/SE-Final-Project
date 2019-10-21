@@ -19,9 +19,6 @@ var writer = csvWriter({sendHeaders: false});
 var csvFilename = "report.csv";
 
 var Report = path.join(__dirname,'', 'report.csv')
-const sleep = (milliseconds) => {
-  return new Promise(resolve => setTimeout(resolve, milliseconds))
-}
 
 
 //Start Handler
@@ -29,13 +26,13 @@ bot.on('start', () => {
 	bot.postMessageToChannel('general', 'Be Assured. Be Secured.');
 	// If CSV file does not exist, create it and add the headers
 	if (!fs.existsSync(csvFilename)) {
-	  writer = csvWriter({sendHeaders: false});
-	  writer.pipe(fs.createWriteStream(csvFilename));
-	  writer.write({
-	    header1: 'MEMBER NAME',
-	    header2: 'FILE NAME'
-	  });
-	  writer.end();
+		writer = csvWriter({sendHeaders: false});
+	  	writer.pipe(fs.createWriteStream(csvFilename));
+	  	writer.write({
+	    		header1: 'MEMBER NAME',
+	    		header2: 'FILE NAME'
+	  	});
+	  	writer.end();
 	} 
 
 });
@@ -47,11 +44,11 @@ bot.on('error', (err) => {console.log(err)});
 bot.on('message', (data) => {
 	//console.log(data);
 	if("files" in data ) {
-		//UseCase 1 - To check if a file(or an image) has virus. If yes, the file is removed and the details of username and filename are logged in a csv file.
+		//To check if a file(or an image) has virus. If yes, the file is removed and the details of username and filename are reported when a threshold is reached.
 		if ( (data["files"][0]['name']).match(/corrupted/i) ){
-			bot.postMessageToChannel('general', "The image is corrupted");
+			bot.postMessageToChannel('general', "The file is corrupted");
+			//To retrieve file ID, file name and user ID
 			file = data["files"][0]['id'];      
-
 			user_id = data["files"][0]['user']; 
 			file_name = data["files"][0]['name'];
 			
@@ -60,32 +57,39 @@ bot.on('message', (data) => {
 			//To delete the image if it contains virus
 			deleteFile(file);
 			//To report logs 
-			report();	
-				 
-			}				
-
-
-
-		//Use Case 2
-		//if ( image_types.includes(data["files"][0]['filetype'].toLowerCase()) ) {		
+			report();			 
+		}				
+		//To check if an image is inappropriate. If yes, the person who uploaded the file is reported immediately.
+		else if ( image_types.includes(data["files"][0]['filetype'].toLowerCase()) ) {	
+			if ((data["files"][0]['name']).match(/inappropriate/i)){
+				bot.postMessageToChannel('general', 'Image is inappropriate');
+				//To retrieve file ID and user ID				
+				file = data["files"][0]['id'];
+				user_id = data["files"][0]['user'];
+				//To delete the image if it is inappropriate
+				deleteFile(file);
+				//To report the person who uploaded the image
+				reportPerson();
+			}
+		}	
 	}
-	//Use Case 3 ( Report requesting )
+	/*Use Case 3 ( Report requesting )
 	else {
 		if ( (data["type"] == "message") & ("client_msg_id" in data) ) {
 			if (data["text"].match(/request/i) )  {
 				bot.postMessageToChannel('general', "The report is here");
 		}
-		}}
+		}}*/
  	
 });
 
+//To report user name and file name if a threshold is reached
 async function report(){
 	logEntries=totalEntries();
 	if(logEntries >= 3){
 		const response_res = await reportLogs(Report);
 		fs.writeFileSync(Report, '', function(){console.log('done')});
-		if(totalEntries() <= 0){
-				
+		if(totalEntries() <= 0){	
 			writer = csvWriter({sendHeaders: false});
 			writer.pipe(fs.createWriteStream(csvFilename));
 			writer.write({
@@ -93,10 +97,11 @@ async function report(){
 				 header2: 'FILE NAME'
 			});
 			writer.end();
-		}}
+		}
+	}
 }
 
-//To get the name of the user using user ID
+//To get the name of the user, given the userID
 function listNameofUser(){
 	token = process.env.SLACK_BOT_TOKEN;
 	return new Promise(function(resolve, reject){
@@ -105,7 +110,6 @@ function listNameofUser(){
 		name_log = info.user.name;
 		resolve(name_log);
 		});
-
 	});
 }
 
@@ -117,7 +121,7 @@ function listIdofOwner(){
 		request.get('https://slack.com/api/users.list?token=' + token + '&pretty=1', function(error, response, body){
 		const info = JSON.parse(body);
 		if ("members" in info){
-			i=0;
+			i = 0;
 			while(info.members[i].is_primary_owner === false){
 				i=i+1;
 			}
@@ -131,7 +135,6 @@ function listIdofOwner(){
 
 //To log the entries in a csv file 
 async function createReport(file_name){
-try{
 	const result = await listNameofUser();
 	writer = csvWriter({sendHeaders: false});
 	writer.pipe(fs.createWriteStream(csvFilename, {flags: 'a'}));
@@ -140,27 +143,39 @@ try{
 		header2: file_name		
 	});
 	writer.end();
-}catch (error) {
-       	console.error('ERROR:');
-        console.error(error);
-    	}
 }
 
 //Reporting the logs
 async function reportLogs(filepath){
 	const owner_id = await listIdofOwner();
-		return requestp.post({
-			url: 'https://slack.com/api/files.upload',
-			formData: {
-				token: process.env.SLACK_BOT_TOKEN,
-				channels: owner_id,
-				file: fs.createReadStream(filepath),
-				filename: "report.csv",
-			},
-			}, function (err, response) {
-				console.log(JSON.parse(response.body));
-			});
+	return requestp.post({
+		url: 'https://slack.com/api/files.upload',
+		formData: {
+			token: process.env.SLACK_BOT_TOKEN,
+			channels: owner_id,
+			file: fs.createReadStream(filepath),
+			filename: "report.csv",
+		},
+		}, function (err, response) {
+			//console.log(JSON.parse(response.body));
+	});
 			
+}
+
+//To report the person who uploaded inappropriate content
+async function reportPerson(){
+	const owner_id = await listIdofOwner();
+	const user_name = await listNameofUser();
+	request.post({
+		url: 'https://slack.com/api/files.upload',
+		formData: {
+			token: process.env.SLACK_BOT_TOKEN,
+			channels: owner_id, 
+			content: user_name + " has posted inappropriate content. Please take necessary action."
+		}, 
+		}, function(err, response){
+			//console.log(JSON.parse(response.body));
+	});
 }
 
 //Delete a file
@@ -170,17 +185,17 @@ function deleteFile(file){
     		form: {
       			token: process.env.SLACK_ACCESS_TOKEN,
     			file: file	
-			}
+		}
 	});
 }
 
 //To get number of CSV file entries
 function totalEntries(){
 	var csvFile = fs.readFileSync(Report);
-	to_string=csvFile.toString();
-	lines=to_string.split('\n');
+	to_string = csvFile.toString();
+	lines = to_string.split('\n');
 	//console.log(lines);
-	var rowsn= lines.length-1;
+	var rowsn = lines.length-1;
 	console.log(rowsn);
 	return rowsn;
 }
