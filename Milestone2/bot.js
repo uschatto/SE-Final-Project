@@ -1,5 +1,6 @@
 require('dotenv').config();
 request = require('request');
+requestp = require('request-promise')
 const fs = require('fs');
 const SlackBot = require('slackbots');
 const path = require('path');
@@ -14,25 +15,29 @@ const bot = new SlackBot({
 
 var name_log;
 var csvWriter = require('csv-write-stream');
-var writer = csvWriter({sendHeaders: false}); //Instantiate var
+var writer = csvWriter({sendHeaders: false}); 
 var csvFilename = "report.csv";
 
 var Report = path.join(__dirname,'', 'report.csv')
+const sleep = (milliseconds) => {
+  return new Promise(resolve => setTimeout(resolve, milliseconds))
+}
 
-// If CSV file does not exist, create it and add the headers
-if (!fs.existsSync(csvFilename)) {
-  writer = csvWriter({sendHeaders: false});
-  writer.pipe(fs.createWriteStream(csvFilename));
-  writer.write({
-    header1: 'MEMBER NAME',
-    header2: 'FILE NAME'
-  });
-  writer.end();
-} 
 
 //Start Handler
 bot.on('start', () => {
 	bot.postMessageToChannel('general', 'Be Assured. Be Secured.');
+	// If CSV file does not exist, create it and add the headers
+	if (!fs.existsSync(csvFilename)) {
+	  writer = csvWriter({sendHeaders: false});
+	  writer.pipe(fs.createWriteStream(csvFilename));
+	  writer.write({
+	    header1: 'MEMBER NAME',
+	    header2: 'FILE NAME'
+	  });
+	  writer.end();
+	} 
+
 });
 
 //Error Handler
@@ -55,8 +60,9 @@ bot.on('message', (data) => {
 			//To delete the image if it contains virus
 			deleteFile(file);
 			//To report logs 
-			reportLogs(Report);				
-		}
+			report();	
+				 
+			}				
 
 
 
@@ -70,8 +76,26 @@ bot.on('message', (data) => {
 				bot.postMessageToChannel('general', "The report is here");
 		}
 		}}
-
+ 	
 });
+
+async function report(){
+	logEntries=totalEntries();
+	if(logEntries >= 3){
+		const response_res = await reportLogs(Report);
+		fs.writeFileSync(Report, '', function(){console.log('done')});
+		if(totalEntries() <= 0){
+				
+			writer = csvWriter({sendHeaders: false});
+			writer.pipe(fs.createWriteStream(csvFilename));
+			writer.write({
+				 header1: 'MEMBER NAME',
+				 header2: 'FILE NAME'
+			});
+			writer.end();
+		}}
+}
+
 //To get the name of the user using user ID
 function listNameofUser(){
 	token = process.env.SLACK_BOT_TOKEN;
@@ -84,24 +108,6 @@ function listNameofUser(){
 
 	});
 }
-
-//To log the entries in a csv file 
-async function createReport(file_name){
-try{
-	const result = await listNameofUser();
-	writer = csvWriter({sendHeaders: false});
-	writer.pipe(fs.createWriteStream(csvFilename, {flags: 'a'}));
-	writer.write({
-		header1: result,
-		header2: file_name		
-	});
-	writer.end();
-}catch (error) {
-       	console.error('ERROR:');
-        console.error(error);
-    	}
-}
-
 
 
 //To get the ID of the primary owner
@@ -143,17 +149,18 @@ try{
 //Reporting the logs
 async function reportLogs(filepath){
 	const owner_id = await listIdofOwner();
-	request.post({
-		url: 'https://slack.com/api/files.upload',
-		formData: {
-			token: process.env.SLACK_BOT_TOKEN,
-			channels: owner_id,
-			file: fs.createReadStream(filepath),
-			filename: "report.csv",
-		},
-		}, function (err, response) {
-			console.log(JSON.parse(response.body));
-		});
+		return requestp.post({
+			url: 'https://slack.com/api/files.upload',
+			formData: {
+				token: process.env.SLACK_BOT_TOKEN,
+				channels: owner_id,
+				file: fs.createReadStream(filepath),
+				filename: "report.csv",
+			},
+			}, function (err, response) {
+				console.log(JSON.parse(response.body));
+			});
+			
 }
 
 //Delete a file
@@ -165,4 +172,15 @@ function deleteFile(file){
     			file: file	
 			}
 	});
+}
+
+//To get number of CSV file entries
+function totalEntries(){
+	var csvFile = fs.readFileSync(Report);
+	to_string=csvFile.toString();
+	lines=to_string.split('\n');
+	//console.log(lines);
+	var rowsn= lines.length-1;
+	console.log(rowsn);
+	return rowsn;
 }
