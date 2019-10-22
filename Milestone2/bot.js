@@ -45,48 +45,60 @@ bot.on('message', (data) => {
 	if("files" in data ) {
 		if (data["files"][0]['name'] !== 'report.csv' && data["files"][0]['name'] !== 'imgReport.csv'){
 		//To check if a file(or an image) has virus. If yes, the file is removed and the details of username and filename are reported when a threshold is reached.
-		if ( (data["files"][0]['name']).match(/corrupted/i) ){
-			bot.postMessageToChannel('general', "The file is corrupted");
-			//To retrieve file ID, file name and user ID
-			file = data["files"][0]['id'];      
-			user_id = data["files"][0]['user']; 
-			file_name = data["files"][0]['name'];
-			
-			//To log the name of the user and file name in a csv file
-			createReport(file_name);
-			//To delete the image if it contains virus
-			deleteFile(file);
-			//To report logs 
-			report();			 
-		}
-		//To check if an image is inappropriate. If yes, the person who uploaded the file is reported immediately.
-		else if( image_types.includes(data["files"][0]['filetype'].toLowerCase()) ) {	
-			if ((data["files"][0]['name']).match(/inappropriate/i)){
-				bot.postMessageToChannel('general', 'Image is inappropriate');
-				//To retrieve file ID and user ID				
-				file = data["files"][0]['id'];
-				user_id = data["files"][0]['user'];
-				//To delete the image if it is inappropriate
+			if ( (data["files"][0]['name']).match(/corrupted/i) ){
+				bot.postMessageToChannel('general', "The file is corrupted");
+				//To retrieve file ID, file name and user ID
+				file = data["files"][0]['id'];      
+				user_id = data["files"][0]['user']; 
+				file_name = data["files"][0]['name'];
+				
+				//To log the name of the user and file name in a csv file
+				createReport(file_name);
+				//To delete the image if it contains virus
 				deleteFile(file);
-				//To report the person who uploaded the image
-				reportPerson();				
+				//To report logs 
+				report();			 
+			}
+			//To check if an image is inappropriate. If yes, the person who uploaded the file is reported immediately.
+			else if( image_types.includes(data["files"][0]['filetype'].toLowerCase()) ) {	
+				if ((data["files"][0]['name']).match(/inappropriate/i)){
+					bot.postMessageToChannel('general', 'Image is inappropriate');
+					//To retrieve file ID and user ID				
+					file = data["files"][0]['id'];
+					user_id = data["files"][0]['user'];
+					//To delete the image if it is inappropriate
+					deleteFile(file);
+					//To report the person who uploaded the image
+					reportPerson();				
+				}
+				else{
+					bot.postMessageToChannel('general', 'Scanning complete. Image safe to download.');
+				}
 			}
 			else{
-				bot.postMessageToChannel('general', 'Scanning complete. Image safe to download.');
+				bot.postMessageToChannel('general', 'Scanning complete. File safe to download');
 			}
 		}
-		else{
-			bot.postMessageToChannel('general', 'Scanning complete. File safe to download');
+	}
+	else if("text" in data){
+		if(data["text"] == 'Send the corrupted files report'){
+			var user_identity = data["user"];
+			reportOnDemand(user_identity);
 		}
+	}
+});
+
+//Sending report on demand to the primary owner
+async function reportOnDemand(user_identity){
+	const owner_id = await listIdofOwner();
+	if (user_identity == owner_id){
+		reportLogs(Report);
 	}
 }
 
-});
-
 //To report user name and file name if a threshold is reached
 async function report(){
-	logEntries=totalEntries();
-	if(logEntries >= 3){
+	if(totalEntries() >= 15){
 		const response_res = await reportLogs(Report);
 		fs.writeFileSync(Report, '', function(){console.log('done')});
 		if(totalEntries() <= 0){	
@@ -200,6 +212,5 @@ function totalEntries(){
 	to_string = csvFile.toString();
 	lines = to_string.split('\n');
 	var rowsn = lines.length-1;
-	console.log(rowsn);
 	return rowsn;
 }
