@@ -1,7 +1,7 @@
 ## **Bot Platform and Implementation**
 > [Bot Platform and Implementation](https://github.ncsu.edu/csc510-fall2019/CSC510-8/blob/master/Milestone2/bot.js)
 
-<p align="justify">SecBot is fully operational within Slack. The code is written in node.js. Our bot makes requests to Virus Total API and API for Image Moderation; the reponses have been mocked for this milestone. SecBot is integrated with Slack API.
+<p align="justify">SecBot is fully operational within Slack. The code is written in node.js. Our bot makes requests to VirusTotal API and WebPurify API; the reponses have been mocked for this milestone. SecBot is integrated with Slack API.
 
 The bot can perform all the functions as mentioned in the use cases. When files(or images) are uploaded, it scans for virus. When a file contains virus, the file is removed and entries, consisting of names of the file and the person who uploaded the file, are logged in report.csv file. A threshold is set on the number of entries in the file. If the threshold is reached, the file is sent to the primary owner of the workspace and the file is cleared. When images are uploaded, it initially checks if the image is corrupted. If it is not, it then checks if the image is inappropriate. </p>
 
@@ -61,10 +61,10 @@ User will upload an image or file [S1], the bot will scan the file or image uplo
 ```
 
 ## **Mocking Infrastructure**
-We have used nock to intercept the API calls to VirustTotal(used to scan for virus in files) and WebPurify(to check if the image is inappropriate). 
-- We have mocked the response from virusTotal as either {"virus":true} or {"virus":false} by checking the name of the files uploaded. All files with 'corrupted' in their names will get {"virus":true} response from the API. 
-- Similarly, the response from Webpurify will be {"inappropriate" : true} if the name of the image contains the word "inappropriate", otherwise {"inappropriate" : false} will be returned. Only image files are checked for inappropriate content. For this milestone, we have used WebPurify instead of ModerataContent to check if the uploaded image is down as moderateContent webpage is down at the moment.These responses are defined in bot.js. 
-- As for the third usecase, the bot should send an email containing logs of corrupted files to the security team. It should also send a complaint to the HR via email when inappropriate content is posted on the channel. For this milestone, instead of using the gmail API, SecBot sends the report and complaint to the primary owner of the workspace instead. (We are also sending these on #management channel for testing purposes). 
+We have used nock to intercept the API calls to VirusTotal(used to scan for virus in files) and WebPurify(to check if the image is inappropriate). 
+- We have mocked the response from VirusTotal as either {"virus":true} or {"virus":false} by checking the name of the files uploaded. All files with 'corrupted' in their names will get {"virus":true} response from the API. 
+- Similarly, the response from Webpurify will be {"inappropriate" : true} if the name of the image contains the word "inappropriate", otherwise {"inappropriate" : false} will be returned. Only image files are checked for inappropriate content. For this milestone, we have used WebPurify instead of ModerateContent to check if the uploaded image is down as moderateContent webpage is down at the moment.These responses are defined in bot.js. 
+- As for the third usecase, the bot should send an email containing logs of corrupted files to the security team. It should also send a complaint to the HR via email when inappropriate content is posted on the channel. For this milestone, instead of using the gmail API, SecBot sends the report and complaint to the primary owner of the workspace. (We are also sending these on #management channel for testing purposes). 
 
 ## **Selenium Testing For Each Use Case**
 > [Selenium Testing](https://github.ncsu.edu/csc510-fall2019/CSC510-8/blob/master/Milestone2/selenium/secbot.java)
