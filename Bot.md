@@ -12,7 +12,7 @@
 1) Normal User - Uploads files and images to #general channel of a slack workspace
 2) ADMIN User - Owner of the slack workspace and is a member of #management channel along with the SecBot app. This channel would receive the reports of all the malpractices from SecBot app.
 
-The SecBot requires integration of your slack workspace with the google drive containing files(corrupted, normal and inappropriate) to be used for uploading.The SecBot also needs to be invited to the #general channel where the test case will be executed. The following cases are covered in the selenium testing:
+The SecBot requires integration of your slack workspace with the google drive containing files(corrupted, normal and inappropriate) to be used for uploading.The SecBot also needs to be invited to the #general channel where the test case will be executed. The user's email address and password,slack's workspace URL and the chromedriver path are accessed with the help of the environment variables and need to set as a prerequiste for this testing.The following cases are covered in the selenium testing:
 
 ### Use Case 1: File checking for viruses
 ***Happy Path : Normal file upload***
