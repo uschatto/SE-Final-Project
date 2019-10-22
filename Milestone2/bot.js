@@ -52,6 +52,12 @@ bot.on('error', (err) => {console.log(err)});
 bot.on('message', (data) => {
 	if("files" in data ) {
 		if (data["files"][0]['name'] !== 'report.csv' && data["files"][0]['name'] !== 'imgReport.csv'){
+			//To retrieve file ID, user ID, file name and file type			
+			file = data["files"][0]['id'];      
+			user_id = data["files"][0]['user']; 
+			file_name = data["files"][0]['name'];
+			filetype = data["files"][0]['filetype'].toLowerCase();
+			
 			//Setting Mock response from VirusTotal API
 			if ((data["files"][0]['name']).match(/corrupted/i)){ 
 				virusTotal = {virus : true };
@@ -64,19 +70,24 @@ bot.on('message', (data) => {
 					moderateContent = {inappropriate : true};
 				else
 					moderateContent = {inappropriate : false};
-			}
-			
+
+				//Using nock to intercept Inappropriate image checking GET request
+				
+				var mockGetMod = nock("http://im-api1.webpurify.com")
+			  		.persist() 
+			  		.get('/services/rest/', {
+						method: 'webpurify.live.imgcheck',
+						api_key: 'abcd1234',    //Random API key
+						imgurl: 'https://thencsu.slack.com/files/'+ user_id + '/'+ file + '/' + file_name,
+						format: 'json'
+			  		})
+			  		.reply(200, JSON.stringify(moderateContent.inappropriate));
+			}	
 		 	const options = {
 		  		headers: {
 		    			'Content-Type': 'application/json'
 		  		}
 			}
-
-			//To retrieve file ID, user ID, file name and file type
-			file = data["files"][0]['id'];      
-			user_id = data["files"][0]['user']; 
-			file_name = data["files"][0]['name'];
-			filetype = data["files"][0]['filetype'].toLowerCase();
 		
 			//Using nock to intercept virusTotal POST request
 			var mockPostVt = nock("https://www.virustotal.com")
@@ -96,19 +107,8 @@ bot.on('message', (data) => {
 			   })
 			   .reply(200, JSON.stringify(virusTotal.virus));
 
-			//Using nock to intercept Inappropriate image checking GET request
-			var mockGetMod = nock("http://im-api1.webpurify.com")
-			  .persist() 
-			  .get('/services/rest/', {
-				method: 'webpurify.live.imgcheck',
-				api_key: 'abcd1234',    //Random API key
-				imgurl: 'https://thencsu.slack.com/files/'+ user_id + '/'+ file + '/' + file_name,
-				format: 'json'
-			  })
-			  .reply(200, JSON.stringify(moderateContent.inappropriate));
-
 			//To check for corrupt files and inappropriate images 	
-			fileCheck(file, user_id, file_name, filetype);
+			fileCheck(file, user_id, file_name, filetype);	
 		}
 	}
 	else if("text" in data){
@@ -120,11 +120,11 @@ bot.on('message', (data) => {
 	}
 });
 
-async function fileCheck(file, user_id, file_name,filetype){
+async function fileCheck(file, user_id, file_name, filetype){
 	//Checking a file or an image if it is corrupted
-	vtPost = await virusTotalScan();
+	vtPost = await virusTotalScan(user_id);
 	if (vtPost.match(/true/i))
-		vtGet = await virusTotalReport();		
+		vtGet = await virusTotalReport(user_id);		
 	if (vtGet.match(/true/i)){
 		bot.postMessageToChannel('general', "The file is corrupted");
 		//To log the name of the user and file name in a csv file
@@ -135,26 +135,27 @@ async function fileCheck(file, user_id, file_name,filetype){
 		report();
 	}
 	//Checking if an image is inappropriate
-	modcontent_get = await inappropriateCheck();	
-	if (modcontent_get.match(/true/i)){
-		bot.postMessageToChannel('general', 'Image is inappropriate');
-		//To retrieve file ID and user ID				
-		//To delete the image if it is inappropriate
-		deleteFile(file);
-		//To report the person who uploaded the image
-		reportPerson();				
+	if (image_types.includes(filetype)){
+		modcontent_get = await inappropriateCheck(user_id, file, file_name);		
 	}
-	//Neither corrupted nor inappopriate
-	if (vtGet.match(/false/i) && modcontent_get.match(/false/i)){
-		if (image_types.includes(filetype))
+	if (vtGet.match(/false/i)){
+		if (image_types.includes(filetype) && modcontent_get.match(/false/i))
 			bot.postMessageToChannel('general', 'Scanning complete. Image safe to download.')
+		else if(image_types.includes(filetype) && modcontent_get.match(/true/i)){
+			bot.postMessageToChannel('general', 'Image is inappropriate');
+			//To retrieve file ID and user ID				
+			//To delete the image if it is inappropriate
+			deleteFile(file);
+			//To report the person who uploaded the image
+			reportPerson();			
+		}
 		else
 			bot.postMessageToChannel('general', 'Scanning complete. File safe to download.')
 	}
 }
 
 //To upload a file for virus scan
-function virusTotalScan(){
+function virusTotalScan(user_id){
 	return new Promise(function(resolve, reject){
 		request.post({
 			url: "https://www.virustotal.com/vtapi/v2/url/scan",
@@ -169,7 +170,7 @@ function virusTotalScan(){
 }
 
 //To get the report of scanned file
-function virusTotalReport(){
+function virusTotalReport(user_id){
 	return new Promise(function(resolve, reject){
 		request.get({
 			url: "https://www.virustotal.com/vtapi/v2/url/report",
@@ -184,7 +185,7 @@ function virusTotalReport(){
 }		
 
 //To check if an image is inappropriate using API
-function inappropriateCheck(){
+function inappropriateCheck(user_id, file, file_name){
 	return new Promise(function(resolve, reject){
 		request.get({
 			url: "http://im-api1.webpurify.com/services/rest/",
