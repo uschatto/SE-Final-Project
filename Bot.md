@@ -7,14 +7,13 @@ The bot can perform all the functions as mentioned in the use cases. When files(
 
 Few things to be noted are:
 
-1) Files that are to be tested for malware and inappropriate content should have the keywords 'corrupted' and 'inappropriate' respectively. 
+- Files that are to be tested for malware and inappropriate content should have the keywords 'corrupted' and 'inappropriate' respectively.
 
-2) Files/Images have to be uploaded in the 'general' channel.
+- Files/Images have to be uploaded in the 'general' channel.
 
-3) SLACK_ACCESS_TOKEN corresponds to OAuth Access Token and SLACK_BOT_TOKEN corresponds to Bot User OAuth Access Token under 'Tokens for Your Workspace' on Slack.
+- For Selenium Testing purposes, 'management' channel has been created for the primary owner to receive the corrupted files report.
 
-4) For Selenium Testing purposes, 'management' channel has been created for the primary owner to receive the corrupted files report.
-
+- SLACK_ACCESS_TOKEN corresponds to OAuth Access Token and SLACK_BOT_TOKEN corresponds to Bot User OAuth Access Token under 'Tokens for Your Workspace' on Slack.
 
 ## **Use Cases Refinement**
 
@@ -62,6 +61,10 @@ User will upload an image or file [S1], the bot will scan the file or image uplo
 ```
 
 ## **Mocking Infrastructure**
+We have used nock to intercept the API calls to VirustTotal(used to scan for virus in files) and WebPurify(to check if the image is inappropriate). 
+- We have mocked the response from virusTotal as either {"virus":true} or {"virus":false} by checking the name of the files uploaded. All files with 'corrupted' in their names will get {"virus":true} response from the API. 
+- Similarly, the response from Webpurify will be {"inappropriate" : true} if the name of the image contains the word "inappropriate", otherwise {"inappropriate" : false} will be returned. Only image files are checked for inappropriate content. For this milestone, we have used WebPurify instead of ModerataContent to check if the uploaded image is down as moderateContent webpage is down at the moment.These responses are defined in bot.js. 
+- As for the third usecase, the bot should send an email containing logs of corrupted files to the security team. It should also send a complaint to the HR via email when inappropriate content is posted on the channel. For this milestone, instead of using the gmail API, SecBot sends the report and complaint to the primary owner of the workspace instead. (We are also sending these on #management channel for testing purposes). 
 
 ## **Selenium Testing For Each Use Case**
 > [Selenium Testing](https://github.ncsu.edu/csc510-fall2019/CSC510-8/blob/master/Milestone2/selenium/secbot.java)
@@ -128,7 +131,7 @@ Image will be not be uploaded on the channel and a message will be sent by the S
 > *Output:*
 Image will be not be uploaded on the channel and a message will be sent by the SecBot saying "Image inappropriate".
 
-***Alternative Path 2 : Inappropriate Image Report***
+***Alternative Path 3 : Inappropriate Image Report***
 > *Steps:*
 1) Login slack workspace as ADMIN user
 2) Go to the #management channel
