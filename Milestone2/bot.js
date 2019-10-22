@@ -4,6 +4,7 @@ requestp = require('request-promise')
 const fs = require('fs');
 const SlackBot = require('slackbots');
 const path = require('path');
+var nock = require("nock");
 
 const image_types = ["jpeg" , "jpg" , "jpe" , "jfif" , "jif" , "jfi" , "png" , "svg" , "webp" , "tiff" , "tif" , "psd" , "raw" , "arw" , "cr2" , "nrw" , "k25" , "bmp"] 
 
@@ -17,6 +18,13 @@ var csvWriter = require('csv-write-stream');
 var writer = csvWriter({sendHeaders: false}); 
 var csvFilename = "report.csv";
 var imagecsvFilename = "imgReport.csv";
+
+var virusTotal;
+var moderateContent;
+var vtGet;
+var vtPost;
+var vt_json = {"queued": true};
+var modcontent_get;
 
 var Report = path.join(__dirname,'', 'report.csv')
 var imageReport = path.join(__dirname, '', 'imgReport.csv')
@@ -44,49 +52,154 @@ bot.on('error', (err) => {console.log(err)});
 bot.on('message', (data) => {
 	if("files" in data ) {
 		if (data["files"][0]['name'] !== 'report.csv' && data["files"][0]['name'] !== 'imgReport.csv'){
-		//To check if a file(or an image) has virus. If yes, the file is removed and the details of username and filename are reported when a threshold is reached.
-			if ( (data["files"][0]['name']).match(/corrupted/i) ){
-				bot.postMessageToChannel('general', "The file is corrupted");
-				//To retrieve file ID, file name and user ID
-				file = data["files"][0]['id'];      
-				user_id = data["files"][0]['user']; 
-				file_name = data["files"][0]['name'];
-				
-				//To log the name of the user and file name in a csv file
-				createReport(file_name);
-				//To delete the image if it contains virus
-				deleteFile(file);
-				//To report logs 
-				report();			 
+			//Setting Mock response from VirusTotal API
+			if ((data["files"][0]['name']).match(/corrupted/i)){ 
+				virusTotal = {virus : true };
 			}
-			//To check if an image is inappropriate. If yes, the person who uploaded the file is reported immediately.
-			else if( image_types.includes(data["files"][0]['filetype'].toLowerCase()) ) {	
-				if ((data["files"][0]['name']).match(/inappropriate/i)){
-					bot.postMessageToChannel('general', 'Image is inappropriate');
-					//To retrieve file ID and user ID				
-					file = data["files"][0]['id'];
-					user_id = data["files"][0]['user'];
-					//To delete the image if it is inappropriate
-					deleteFile(file);
-					//To report the person who uploaded the image
-					reportPerson();				
-				}
-				else{
-					bot.postMessageToChannel('general', 'Scanning complete. Image safe to download.');
-				}
+			else
+				virusTotal = {virus : false};
+			//Setting Mock response from Inappropriate image checking API
+			if(image_types.includes(data["files"][0]['filetype'].toLowerCase())) {	
+				if ((data["files"][0]['name']).match(/inappropriate/i))
+					moderateContent = {inappropriate : true};
+				else
+					moderateContent = {inappropriate : false};
 			}
-			else{
-				bot.postMessageToChannel('general', 'Scanning complete. File safe to download');
+			
+		 	const options = {
+		  		headers: {
+		    			'Content-Type': 'application/json'
+		  		}
 			}
+
+			//To retrieve file ID, user ID, file name and file type
+			file = data["files"][0]['id'];      
+			user_id = data["files"][0]['user']; 
+			file_name = data["files"][0]['name'];
+			filetype = data["files"][0]['filetype'].toLowerCase();
+		
+			//Using nock to intercept virusTotal POST request
+			var mockPostVt = nock("https://www.virustotal.com")
+			   .persist() 
+			   .post('/vtapi/v2/url/scan', {
+				apikey: 'abcd1234',  //Random API key
+				url: 'https://thencsu.slack.com/files/'+ user_id + '/'+ file + '/' + file_name
+			   })
+			   .reply(200, JSON.stringify(vt_json.queued));
+
+			//Using nock to intercept virusTotal GET request
+			var mockGetVt = nock("https://www.virustotal.com")
+			   .persist() 
+			   .get('/vtapi/v2/url/report', {
+				apikey: 'abcd1234',   //Random API key
+				resource: 'https://thencsu.slack.com/files/'+ user_id + '/'+ file + '/' + file_name
+			   })
+			   .reply(200, JSON.stringify(virusTotal.virus));
+
+			//Using nock to intercept Inappropriate image checking GET request
+			var mockGetMod = nock("http://im-api1.webpurify.com")
+			  .persist() 
+			  .get('/services/rest/', {
+				method: 'webpurify.live.imgcheck',
+				api_key: 'abcd1234',    //Random API key
+				imgurl: 'https://thencsu.slack.com/files/'+ user_id + '/'+ file + '/' + file_name,
+				format: 'json'
+			  })
+			  .reply(200, JSON.stringify(moderateContent.inappropriate));
+
+			//To check for corrupt files and inappropriate images 	
+			fileCheck(file, user_id, file_name, filetype);
 		}
 	}
 	else if("text" in data){
+		//Report to primary owner and 'management' channel on demand 
 		if(data["text"] == 'Send the corrupted files report'){
 			var user_identity = data["user"];
 			reportOnDemand(user_identity);
 		}
 	}
 });
+
+async function fileCheck(file, user_id, file_name,filetype){
+	//Checking a file or an image if it is corrupted
+	vtPost = await virusTotalScan();
+	if (vtPost.match(/true/i))
+		vtGet = await virusTotalReport();		
+	if (vtGet.match(/true/i)){
+		bot.postMessageToChannel('general', "The file is corrupted");
+		//To log the name of the user and file name in a csv file
+		createReport(file_name);
+		//To delete the image if it contains virus
+		deleteFile(file);
+		//To report logs 
+		report();
+	}
+	//Checking if an image is inappropriate
+	modcontent_get = await inappropriateCheck();	
+	if (modcontent_get.match(/true/i)){
+		bot.postMessageToChannel('general', 'Image is inappropriate');
+		//To retrieve file ID and user ID				
+		//To delete the image if it is inappropriate
+		deleteFile(file);
+		//To report the person who uploaded the image
+		reportPerson();				
+	}
+	//Neither corrupted nor inappopriate
+	if (vtGet.match(/false/i) && modcontent_get.match(/false/i)){
+		if (image_types.includes(filetype))
+			bot.postMessageToChannel('general', 'Scanning complete. Image safe to download.')
+		else
+			bot.postMessageToChannel('general', 'Scanning complete. File safe to download.')
+	}
+}
+
+//To upload a file for virus scan
+function virusTotalScan(){
+	return new Promise(function(resolve, reject){
+		request.post({
+			url: "https://www.virustotal.com/vtapi/v2/url/scan",
+			form: {
+				apikey: "abcd1234", //Random API key
+				url: 'https://thencsu.slack.com/files/'+ user_id + '/'+ file + '/' + file_name
+		},
+		},function(options, response) {
+		resolve(JSON.stringify(response.body));
+		});
+	});
+}
+
+//To get the report of scanned file
+function virusTotalReport(){
+	return new Promise(function(resolve, reject){
+		request.get({
+			url: "https://www.virustotal.com/vtapi/v2/url/report",
+			form: {
+				apikey: 'abcd1234', //Random API key
+				resource: 'https://thencsu.slack.com/files/'+ user_id + '/'+ file + '/' + file_name
+		}, 
+		}, function(options, response) {
+			resolve(JSON.stringify(response.body));
+		});
+	});
+}		
+
+//To check if an image is inappropriate using API
+function inappropriateCheck(){
+	return new Promise(function(resolve, reject){
+		request.get({
+			url: "http://im-api1.webpurify.com/services/rest/",
+			form: {
+				method: 'webpurify.live.imgcheck',
+				api_key: 'abcd1234', //Random API key
+				imgurl: 'https://thencsu.slack.com/files/'+ user_id + '/'+ file + '/' + file_name,
+				format: 'json'
+		}, 
+		},function(options, response) {
+			modcontent_get = JSON.stringify(response.body);
+			resolve(modcontent_get);
+		});
+	});	
+}		
 
 //Sending report on demand to the primary owner
 async function reportOnDemand(user_identity){
@@ -98,7 +211,7 @@ async function reportOnDemand(user_identity){
 
 //To report user name and file name if a threshold is reached
 async function report(){
-	if(totalEntries() >= 15){
+	if(totalEntries() >= 20){
 		const response_res = await reportLogs(Report);
 		fs.writeFileSync(Report, '', function(){console.log('done')});
 		if(totalEntries() <= 0){	
@@ -135,9 +248,9 @@ function listIdofOwner(){
 		if ("members" in info){
 			i = 0;
 			while(info.members[i].is_primary_owner === false){
-				i=i+1;
+				i = i+1;
 			}
-			owner_id=info.members[i].id;
+			owner_id = info.members[i].id;
 		}
 		resolve(owner_id);
 		});
