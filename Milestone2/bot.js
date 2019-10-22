@@ -5,7 +5,6 @@ const fs = require('fs');
 const SlackBot = require('slackbots');
 const path = require('path');
 
-
 const image_types = ["jpeg" , "jpg" , "jpe" , "jfif" , "jif" , "jfi" , "png" , "svg" , "webp" , "tiff" , "tif" , "psd" , "raw" , "arw" , "cr2" , "nrw" , "k25" , "bmp"] 
 
 const bot = new SlackBot({
@@ -19,7 +18,7 @@ var writer = csvWriter({sendHeaders: false});
 var csvFilename = "report.csv";
 
 var Report = path.join(__dirname,'', 'report.csv')
-
+var check_done = 'false';
 
 //Start Handler
 bot.on('start', () => {
@@ -42,8 +41,9 @@ bot.on('error', (err) => {console.log(err)});
 
 //Message Handler
 bot.on('message', (data) => {
-	//console.log(data);
 	if("files" in data ) {
+		if (data["files"][0]['name'] !== 'report.csv'){
+		console.log(check_done);
 		//To check if a file(or an image) has virus. If yes, the file is removed and the details of username and filename are reported when a threshold is reached.
 		if ( (data["files"][0]['name']).match(/corrupted/i) ){
 			bot.postMessageToChannel('general', "The file is corrupted");
@@ -56,11 +56,12 @@ bot.on('message', (data) => {
 			createReport(file_name);
 			//To delete the image if it contains virus
 			deleteFile(file);
+			//check_done = 'true';
 			//To report logs 
 			report();			 
-		}				
+		}
 		//To check if an image is inappropriate. If yes, the person who uploaded the file is reported immediately.
-		else if ( image_types.includes(data["files"][0]['filetype'].toLowerCase()) ) {	
+		else if( image_types.includes(data["files"][0]['filetype'].toLowerCase()) ) {	
 			if ((data["files"][0]['name']).match(/inappropriate/i)){
 				bot.postMessageToChannel('general', 'Image is inappropriate');
 				//To retrieve file ID and user ID				
@@ -68,11 +69,23 @@ bot.on('message', (data) => {
 				user_id = data["files"][0]['user'];
 				//To delete the image if it is inappropriate
 				deleteFile(file);
+				//check_done = 'true';
 				//To report the person who uploaded the image
-				reportPerson();
+				reportPerson();				
 			}
-		}	
+			else{
+				bot.postMessageToChannel('general', 'Scanning complete. Image safe to download.');
+          			//check_done = 'true';
+			}
+		}
+		else{
+			bot.postMessageToChannel('general', 'Scanning complete. File safe to download');
+			//check_done = 'true';	
+		}
+		console.log("Reached");
 	}
+}
+
 	/*Use Case 3 ( Report requesting )
 	else {
 		if ( (data["type"] == "message") & ("client_msg_id" in data) ) {
@@ -148,6 +161,7 @@ async function createReport(file_name){
 //Reporting the logs
 async function reportLogs(filepath){
 	const owner_id = await listIdofOwner();
+	check_done = 'true';
 	return requestp.post({
 		url: 'https://slack.com/api/files.upload',
 		formData: {
@@ -158,14 +172,14 @@ async function reportLogs(filepath){
 		},
 		}, function (err, response) {
 			//console.log(JSON.parse(response.body));
-	});
-			
+	});		
 }
 
 //To report the person who uploaded inappropriate content
 async function reportPerson(){
 	const owner_id = await listIdofOwner();
 	const user_name = await listNameofUser();
+	check_done = 'true';
 	request.post({
 		url: 'https://slack.com/api/files.upload',
 		formData: {
