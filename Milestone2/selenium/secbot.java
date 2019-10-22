@@ -1,6 +1,9 @@
 package slackintegration;
 
 import java.util.concurrent.TimeUnit;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
@@ -52,8 +55,11 @@ public class secbot
 
                 wait.withTimeout(3, TimeUnit.SECONDS).ignoring(StaleElementReferenceException.class);
 
-                //********************************* USE CASE 1 CORRUPTED IMAGE ***************************************//
+                //********************************* USE CASE 1 NORMAL FILE ***************************************//
 
+                
+                int initial_count = driver.findElements(By.xpath("//*[contains(text(),'Scanning complete. File safe to download')]")).size();
+                
                 // Locate the Attach button
                 messageBot = driver.findElement(By.xpath("/html/body/div[2]/div/div/div[4]/div/div/footer/div/div/div[1]/button"));
                 messageBot.click();                
@@ -79,13 +85,63 @@ public class secbot
 
                         // The window handle loaded is a frame
                         driver.switchTo().frame(1);
-                        WebElement select_image = driver.findElement(By.xpath("//*[text()='abcdef corrupted.JPG']"));
+                        WebElement select_image = driver.findElement(By.xpath("//*[text()='abcdef.pdf']"));
                         select_image.click();
                         WebElement click_select = driver.findElement(By.xpath("//*[text()='Select']"));
                         click_select.click();
                 }
                 driver.switchTo().window(currentHandle);
-                //********************************* USE CASE 1 APPROPRIATE IMAGE***************************************//
+                
+                Thread.sleep(20000);
+                int final_count = driver.findElements(By.xpath("//*[contains(text(),'Scanning complete. File safe to download')]")).size();
+                int count = final_count-initial_count;
+            	assertTrue(count > 0);
+            	
+                //********************************* USE CASE 1 CORRUPTED FILE***************************************//
+                
+            	initial_count = driver.findElements(By.xpath("//*[contains(text(),'The file is corrupted')]")).size();
+            	
+                // Locate the Attach button
+                messageBot = driver.findElement(By.xpath("/html/body/div[2]/div/div/div[4]/div/div/footer/div/div/div[1]/button"));
+                messageBot.click();
+                
+    
+                // Click on the Google Drive button
+                upload = driver.findElement(By.xpath("//*[text()='Google Drive']"));
+                upload.click();
+
+                // Wait for 5 seconds for the driver to load all window handles
+                Thread.sleep(5000);
+
+                // Logic to switch to a new window handle
+                allHandles = driver.getWindowHandles();
+                currentHandle = driver.getWindowHandle();
+                allHandles.remove(currentHandle);
+                nextHandle=allHandles.iterator().next();
+                newHandle = "";
+                if(currentHandle != nextHandle)
+                {
+                        newHandle = nextHandle;
+                        driver.switchTo().window(newHandle);
+                        driver.manage().window().maximize();
+
+                        // The window handle loaded is a frame
+                        driver.switchTo().frame(1);
+                        WebElement select_image = driver.findElement(By.xpath("//*[text()='abcdef corrupted.pdf']"));
+                        select_image.click();
+                        WebElement click_select = driver.findElement(By.xpath("//*[text()='Select']"));
+                        click_select.click();
+                }
+                driver.switchTo().window(currentHandle);
+                
+                Thread.sleep(10000);
+                final_count = driver.findElements(By.xpath("//*[contains(text(),'The file is corrupted')]")).size();
+                count = final_count-initial_count;
+            	assertTrue(count > 0);
+                
+                //********************************* USE CASE 2 Normal Image***************************************//
+            	
+            	initial_count = driver.findElements(By.xpath("//*[contains(text(),'Scanning complete. Image safe to download')]")).size();
                 
                 // Locate the Attach button
                 messageBot = driver.findElement(By.xpath("/html/body/div[2]/div/div/div[4]/div/div/footer/div/div/div[1]/button"));
@@ -120,8 +176,15 @@ public class secbot
                 }
                 driver.switchTo().window(currentHandle);
                 
-                //********************************* USE CASE 2 CORRUPTED FILE***************************************//
+                Thread.sleep(10000);
+                final_count = driver.findElements(By.xpath("//*[contains(text(),'Scanning complete. Image safe to download')]")).size();
+                count = final_count-initial_count;
+            	assertTrue(count > 0);
                 
+                //********************************* USE CASE 2 Corrupted Image***************************************//
+                
+            	initial_count = driver.findElements(By.xpath("//*[contains(text(),'The file is corrupted')]")).size();
+            	
                 // Locate the Attach button
                 messageBot = driver.findElement(By.xpath("/html/body/div[2]/div/div/div[4]/div/div/footer/div/div/div[1]/button"));
                 messageBot.click();
@@ -148,48 +211,17 @@ public class secbot
 
                         // The window handle loaded is a frame
                         driver.switchTo().frame(1);
-                        WebElement select_image = driver.findElement(By.xpath("//*[text()='abcdef corrupted.pdf']"));
+                        WebElement select_image = driver.findElement(By.xpath("//*[text()='abcdef corrupted.JPG']"));
                         select_image.click();
                         WebElement click_select = driver.findElement(By.xpath("//*[text()='Select']"));
                         click_select.click();
                 }
                 driver.switchTo().window(currentHandle);
                 
-                //********************************* USE CASE 2 APPROPRIATE FILE***************************************//
-                
-                // Locate the Attach button
-                messageBot = driver.findElement(By.xpath("/html/body/div[2]/div/div/div[4]/div/div/footer/div/div/div[1]/button"));
-                messageBot.click();
-                
-    
-                // Click on the Google Drive button
-                upload = driver.findElement(By.xpath("//*[text()='Google Drive']"));
-                upload.click();
-
-                // Wait for 5 seconds for the driver to load all window handles
-                Thread.sleep(5000);
-
-                // Logic to switch to a new window handle
-                allHandles = driver.getWindowHandles();
-                currentHandle = driver.getWindowHandle();
-                allHandles.remove(currentHandle);
-                nextHandle=allHandles.iterator().next();
-                newHandle = "";
-                if(currentHandle != nextHandle)
-                {
-                        newHandle = nextHandle;
-                        driver.switchTo().window(newHandle);
-                        driver.manage().window().maximize();
-
-                        // The window handle loaded is a frame
-                        driver.switchTo().frame(1);
-                        WebElement select_image = driver.findElement(By.xpath("//*[text()='abcdef.pdf']"));
-                        select_image.click();
-                        WebElement click_select = driver.findElement(By.xpath("//*[text()='Select']"));
-                        click_select.click();
-                }
-                
-                
+                Thread.sleep(10000);
+                final_count = driver.findElements(By.xpath("//*[contains(text(),'The file is corrupted')]")).size();
+                count = final_count-initial_count;
+            	assertTrue(count > 0);
                 
                 driver.close();
                 driver.quit();
