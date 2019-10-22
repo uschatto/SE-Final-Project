@@ -310,7 +310,7 @@ public class secbot
 
                 wait.withTimeout(3, TimeUnit.SECONDS).ignoring(StaleElementReferenceException.class);
                 
-                checkReport = driver.findElement(By.xpath("//*[contains(text(),'report')]"));
+                checkReport = driver.findElement(By.xpath("//*[contains(text(),'report.csv')]"));
                 assertNotNull(checkReport);
                 
                 System.out.println("Successfully completed selenium testing for 3 use cases");
