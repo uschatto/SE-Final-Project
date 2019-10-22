@@ -131,20 +131,23 @@ Image will be not be uploaded on the channel and a message will be sent by the S
 > *Output:*
 Image will be not be uploaded on the channel and a message will be sent by the SecBot saying "Image inappropriate".
 
-***Alternative Path 3 : Inappropriate Image Report***
-> *Steps:*
-1) Login slack workspace as ADMIN user
-2) Go to the #management channel
-
-> *Output:*
-A report will be uploaded to this channel by the SecBot.
-
-### Use Case 3: On demand report
-***Happy Path : Requested for report***
+### Use Case 3: Report
+***On demand report***
 > *Steps:*
 1) Login slack workspace as ADMIN user
 2) Go to the #management channel
 2) Send a message "Send the corrupted files report"
+
+> *Output:*
+A report will be uploaded to this channel by the SecBot.
+
+***Inappropriate Image Report***
+> *Steps:*
+1) Login slack workspace as normal user
+2) Go to the #general channel
+3) Upload an inappropriate image to the channel
+4) Login slack workspace as ADMIN user
+5) Go to the #management channel
 
 > *Output:*
 A report will be uploaded to this channel by the SecBot.
