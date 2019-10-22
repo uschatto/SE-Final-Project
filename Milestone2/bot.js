@@ -16,9 +16,10 @@ var name_log;
 var csvWriter = require('csv-write-stream');
 var writer = csvWriter({sendHeaders: false}); 
 var csvFilename = "report.csv";
+var imagecsvFilename = "imgReport.csv";
 
 var Report = path.join(__dirname,'', 'report.csv')
-var check_done = 'false';
+var imageReport = path.join(__dirname, '', 'imgReport.csv')
 
 //Start Handler
 bot.on('start', () => {
@@ -42,8 +43,7 @@ bot.on('error', (err) => {console.log(err)});
 //Message Handler
 bot.on('message', (data) => {
 	if("files" in data ) {
-		if (data["files"][0]['name'] !== 'report.csv'){
-		console.log(check_done);
+		if (data["files"][0]['name'] !== 'report.csv' && data["files"][0]['name'] !== 'imgReport.csv'){
 		//To check if a file(or an image) has virus. If yes, the file is removed and the details of username and filename are reported when a threshold is reached.
 		if ( (data["files"][0]['name']).match(/corrupted/i) ){
 			bot.postMessageToChannel('general', "The file is corrupted");
@@ -56,7 +56,6 @@ bot.on('message', (data) => {
 			createReport(file_name);
 			//To delete the image if it contains virus
 			deleteFile(file);
-			//check_done = 'true';
 			//To report logs 
 			report();			 
 		}
@@ -69,31 +68,19 @@ bot.on('message', (data) => {
 				user_id = data["files"][0]['user'];
 				//To delete the image if it is inappropriate
 				deleteFile(file);
-				//check_done = 'true';
 				//To report the person who uploaded the image
 				reportPerson();				
 			}
 			else{
 				bot.postMessageToChannel('general', 'Scanning complete. Image safe to download.');
-          			//check_done = 'true';
 			}
 		}
 		else{
 			bot.postMessageToChannel('general', 'Scanning complete. File safe to download');
-			//check_done = 'true';	
 		}
-		console.log("Reached");
 	}
 }
 
-	/*Use Case 3 ( Report requesting )
-	else {
-		if ( (data["type"] == "message") & ("client_msg_id" in data) ) {
-			if (data["text"].match(/request/i) )  {
-				bot.postMessageToChannel('general', "The report is here");
-		}
-		}}*/
- 	
 });
 
 //To report user name and file name if a threshold is reached
@@ -161,7 +148,6 @@ async function createReport(file_name){
 //Reporting the logs
 async function reportLogs(filepath){
 	const owner_id = await listIdofOwner();
-	check_done = 'true';
 	return requestp.post({
 		url: 'https://slack.com/api/files.upload',
 		formData: {
@@ -171,7 +157,6 @@ async function reportLogs(filepath){
 			filename: "report.csv",
 		},
 		}, function (err, response) {
-			//console.log(JSON.parse(response.body));
 	});		
 }
 
@@ -179,16 +164,22 @@ async function reportLogs(filepath){
 async function reportPerson(){
 	const owner_id = await listIdofOwner();
 	const user_name = await listNameofUser();
-	check_done = 'true';
+	
+	writer = csvWriter({sendHeaders: false});
+	writer.pipe(fs.createWriteStream(imagecsvFilename));
+	writer.write({
+		header1: user_name + " has posted inappropriate content. Please take necessary action."		
+	});
+	writer.end();
 	request.post({
 		url: 'https://slack.com/api/files.upload',
 		formData: {
 			token: process.env.SLACK_BOT_TOKEN,
 			channels: owner_id, 
-			content: user_name + " has posted inappropriate content. Please take necessary action."
+			file: fs.createReadStream(imageReport),
+			filename: "imgReport.csv",
 		}, 
 		}, function(err, response){
-			//console.log(JSON.parse(response.body));
 	});
 }
 
@@ -208,7 +199,6 @@ function totalEntries(){
 	var csvFile = fs.readFileSync(Report);
 	to_string = csvFile.toString();
 	lines = to_string.split('\n');
-	//console.log(lines);
 	var rowsn = lines.length-1;
 	console.log(rowsn);
 	return rowsn;
