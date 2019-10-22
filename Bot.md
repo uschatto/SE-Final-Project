@@ -8,7 +8,11 @@
 ## **Selenium Testing For Each Use Case**
 > [Selenium Testing](https://github.ncsu.edu/csc510-fall2019/CSC510-8/blob/master/Milestone2/selenium/secbot.java)
 
-The SecBot requires integration of the google drive containing files(corrupted,normal and inappropriate) to be used for uploading.The SecBot also needs to invited to the #general channel where the test case will be executed. The following cases are covered in the selenium testing:
+> *For Selenium testing we have taken into account two users*
+1) Normal User - Uploads files and images to #general channel of a slack workspace
+2) ADMIN User - Owner of the slack workspace and is a member of #management channel along with the SecBot app. This channel would receive the reports of all the malpractices from SecBot app.
+
+The SecBot requires integration of your slack workspace with the google drive containing files(corrupted, normal and inappropriate) to be used for uploading.The SecBot also needs to be invited to the #general channel where the test case will be executed. The following cases are covered in the selenium testing:
 
 ### Use Case 1: File checking for viruses
 ***Happy Path : Normal file upload***
@@ -55,21 +59,24 @@ Image will be not be uploaded on the channel and a message will be sent by the S
 3) Upload an inappropriate image to the channel
 
 > *Output:*
-Image will be not be uploaded on the channel and a message will be sent by the SecBot saying "Image inappropriate".A message will also be sent to the owner of the channel for this inappropriate image.
+Image will be not be uploaded on the channel and a message will be sent by the SecBot saying "Image inappropriate".
+
+***Alternative Path 2 : Inappropriate Image Report***
+> *Steps:*
+1) Login slack workspace as ADMIN user
+2) Go to the #management channel
+
+> *Output:*
+A report will be uploaded to this channel by the SecBot.
 
 ### Use Case 3: On demand report
 ***Happy Path : Requested for report***
 > *Steps:*
-1) Login slack workspace as the owner
-2) Request for the report from the SecBot
+1) Login slack workspace as ADMIN user
+2) Go to the management channel
+2) Send a message "Send the corrupted files report"
 
 > *Output:*
-A report file will se sent to the user. 
-
-
-
-
-
-
+A report will be uploaded to this channel by the SecBot.
 
 ## **Screencast** 
