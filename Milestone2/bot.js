@@ -160,13 +160,15 @@ async function createReport(file_name){
 //Reporting the logs
 async function reportLogs(filepath){
 	const owner_id = await listIdofOwner();
+	const multiple_channels = owner_id + ",management";
 	return requestp.post({
 		url: 'https://slack.com/api/files.upload',
 		formData: {
 			token: process.env.SLACK_BOT_TOKEN,
-			channels: owner_id,
+			channels: multiple_channels,
 			file: fs.createReadStream(filepath),
 			filename: "report.csv",
+			title: "report.csv",
 		},
 		}, function (err, response) {
 	});		
@@ -176,6 +178,7 @@ async function reportLogs(filepath){
 async function reportPerson(){
 	const owner_id = await listIdofOwner();
 	const user_name = await listNameofUser();
+	const multiple_channels = owner_id + ",management";
 	
 	writer = csvWriter({sendHeaders: false});
 	writer.pipe(fs.createWriteStream(imagecsvFilename));
@@ -187,7 +190,7 @@ async function reportPerson(){
 		url: 'https://slack.com/api/files.upload',
 		formData: {
 			token: process.env.SLACK_BOT_TOKEN,
-			channels: owner_id, 
+			channels: multiple_channels, 
 			file: fs.createReadStream(imageReport),
 			filename: "imgReport.csv",
 		}, 
