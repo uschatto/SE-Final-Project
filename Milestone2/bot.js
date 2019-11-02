@@ -4,14 +4,11 @@ requestp = require('request-promise')
 const fs = require('fs');
 const SlackBot = require('slackbots');
 const path = require('path');
-
 var nock = require("nock");
-var newurl;
 
 const image_types = ["jpeg" , "jpg" , "jpe" , "jfif" , "jif" , "jfi" , "png" , "svg" , "webp" , "tiff" , "tif" , "psd" , "raw" , "arw" , "cr2" , "nrw" , "k25" , "bmp"] 
 
 const bot = new SlackBot({
-	
 	token: process.env.SLACK_BOT_TOKEN,
 	name: 'SecBot'
 });
@@ -45,6 +42,7 @@ bot.on('start', () => {
 	  	});
 	  	writer.end();
 	} 
+
 });
 
 //Error Handler
@@ -54,30 +52,37 @@ bot.on('error', (err) => {console.log(err)});
 bot.on('message', (data) => {
 	if("files" in data ) {
 		if (data["files"][0]['name'] !== 'report.csv' && data["files"][0]['name'] !== 'imgReport.csv'){
-			//To retrieve file ID, user ID, file name and file type		
+			//To retrieve file ID, user ID, file name and file type			
 			file = data["files"][0]['id'];      
 			user_id = data["files"][0]['user']; 
 			file_name = data["files"][0]['name'];
-			permalink = data["files"][0]['permalink_public']
 			filetype = data["files"][0]['filetype'].toLowerCase();
-
-			//To enable public file sharing
-			request.post({
-				url: 'https://slack.com/api/files.sharedPublicURL',
-				formData: {
-					token: process.env.SLACK_ACCESS_TOKEN,
-					file: file //fileID
-				}, 
-				}, function(err, response){
-			});
-			
 			
 			//Setting Mock response from VirusTotal API
 			if ((data["files"][0]['name']).match(/corrupted/i)){ 
 				virusTotal = {virus : true };
 			}
 			else
-				virusTotal = {virus : false};	
+				virusTotal = {virus : false};
+			//Setting Mock response from Inappropriate image checking API
+			if(image_types.includes(data["files"][0]['filetype'].toLowerCase())) {	
+				if ((data["files"][0]['name']).match(/inappropriate/i))
+					moderateContent = {inappropriate : true};
+				else
+					moderateContent = {inappropriate : false};
+
+				//Using nock to intercept Inappropriate image checking GET request
+				
+				var mockGetMod = nock("http://im-api1.webpurify.com")
+			  		.persist() 
+			  		.get('/services/rest/', {
+						method: 'webpurify.live.imgcheck',
+						api_key: 'abcd1234',    //Random API key
+						imgurl: 'https://thencsu.slack.com/files/'+ user_id + '/'+ file + '/' + file_name,
+						format: 'json'
+			  		})
+			  		.reply(200, JSON.stringify(moderateContent.inappropriate));
+			}	
 		 	const options = {
 		  		headers: {
 		    			'Content-Type': 'application/json'
@@ -103,7 +108,7 @@ bot.on('message', (data) => {
 			   .reply(200, JSON.stringify(virusTotal.virus));
 
 			//To check for corrupt files and inappropriate images 	
-			fileCheck(file, user_id, file_name, filetype, permalink);	
+			fileCheck(file, user_id, file_name, filetype);	
 		}
 	}
 	else if("text" in data){
@@ -115,7 +120,7 @@ bot.on('message', (data) => {
 	}
 });
 
-async function fileCheck(file, user_id, file_name, filetype, permalink){
+async function fileCheck(file, user_id, file_name, filetype){
 	//Checking a file or an image if it is corrupted
 	vtPost = await virusTotalScan(user_id);
 	if (vtPost.match(/true/i))
@@ -131,14 +136,14 @@ async function fileCheck(file, user_id, file_name, filetype, permalink){
 	}
 	//Checking if an image is inappropriate
 	if (image_types.includes(filetype)){
-		modcontent_get = await inappropriateCheck(user_id, file, file_name, permalink);
-		rating=modcontent_get.rating_letter;	
+		modcontent_get = await inappropriateCheck(user_id, file, file_name);		
 	}
 	if (vtGet.match(/false/i)){
-		if (image_types.includes(filetype) && rating != 'a')
+		if (image_types.includes(filetype) && modcontent_get.match(/false/i))
 			bot.postMessageToChannel('general', 'Scanning complete. Image safe to download.')
-		else if(image_types.includes(filetype) && rating == 'a'){
-			bot.postMessageToChannel('general', 'Image is inappropriate');				
+		else if(image_types.includes(filetype) && modcontent_get.match(/true/i)){
+			bot.postMessageToChannel('general', 'Image is inappropriate');
+			//To retrieve file ID and user ID				
 			//To delete the image if it is inappropriate
 			deleteFile(file);
 			//To report the person who uploaded the image
@@ -180,29 +185,19 @@ function virusTotalReport(user_id){
 }		
 
 //To check if an image is inappropriate using API
-function inappropriateCheck(user_id, file, file_name, permalink){
-	//Changing file name according to URL format
-	fileName = file_name.toLowerCase();
-	fileName1 = fileName.replace(" ", "_");
-	
-	//URL link to upload on ModerateContent API
-	linkArray = permalink.split('/')		
-	splitArray = linkArray[3].split('-')		
-	newurl = linkArray[0] + '//files.slack.com/files-pri/' + splitArray[0] + '-' + splitArray[1] +'/' + fileName1 + '?pub_secret=' + splitArray[2]
-
-	//Getting response from ModerateContent API
+function inappropriateCheck(user_id, file, file_name){
 	return new Promise(function(resolve, reject){
-		const options5 = {
-		    url: 'https://www.moderatecontent.com/api/v2?key=' + process.env.APIKEY + '&url=' + newurl ,
-		    method: 'GET',
-		    headers: {
-			'Accept': 'application/json',
-			'Accept-Charset': 'utf-8',
-		    }
-		};
-		request(options5, function(err, res, body) {		
-		    modcontent_get = JSON.parse(body);
-		    resolve(modcontent_get);
+		request.get({
+			url: "http://im-api1.webpurify.com/services/rest/",
+			form: {
+				method: 'webpurify.live.imgcheck',
+				api_key: 'abcd1234', //Random API key
+				imgurl: 'https://thencsu.slack.com/files/'+ user_id + '/'+ file + '/' + file_name,
+				format: 'json'
+		}, 
+		},function(options, response) {
+			modcontent_get = JSON.stringify(response.body);
+			resolve(modcontent_get);
 		});
 	});	
 }		
