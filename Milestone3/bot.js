@@ -9,7 +9,7 @@ var smtpTransport = require('nodemailer-smtp-transport');
 
 var newurl;
 
-const image_types = ["jpeg" , "jpg" , "jpe" , "jfif" , "jif" , "jfi" , "png" , "svg" , "webp" , "tiff" , "tif" , "psd" , "raw" , "arw" , "cr2" , "nrw" , "k25" , "bmp"] 
+const image_types = ["jpeg", "jpg", "png", "bmp", "gif", "webp"]
 
 const bot = new SlackBot({
 	
@@ -100,13 +100,14 @@ async function fileCheck(file, user_id, file_name, filetype, permalink){
 	//Checking if an image is inappropriate
 	if (image_types.includes(filetype)){
 		modcontent_get = await inappropriateCheck(user_id, file, file_name, permalink);
-		rating=modcontent_get.rating_letter;	
+		prediction = modcontent_get.predictions;
+		adult_prediction = prediction['adult'];
 	}
 
 	if (cleanResult == true){
-		if (image_types.includes(filetype) && rating != 'a')
+		if (image_types.includes(filetype) && adult_prediction < 10)
 			bot.postMessageToChannel('general', 'Scanning complete. Image safe to download.')
-		else if(image_types.includes(filetype) && rating == 'a'){
+		else if(image_types.includes(filetype) && adult_prediction >= 10){
 			bot.postMessageToChannel('general', 'Image is inappropriate');				
 			//To delete the image if it is inappropriate
 			deleteFile(file);
@@ -284,8 +285,6 @@ async function reportPerson(){
 	transporter.sendMail(mailOptions, function(error, info){
 	  if (error) {
 	    console.log(error);
-	  } else {
-	    console.log('Email sent: ' + info.response);
 	  }
 	}); 
 }
