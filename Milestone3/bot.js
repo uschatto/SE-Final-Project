@@ -4,6 +4,8 @@ requestp = require('request-promise')
 const fs = require('fs');
 const SlackBot = require('slackbots');
 const path = require('path');
+var nodemailer = require('nodemailer');
+var smtpTransport = require('nodemailer-smtp-transport');
 
 var newurl;
 
@@ -19,7 +21,6 @@ var name_log;
 var csvWriter = require('csv-write-stream');
 var writer = csvWriter({sendHeaders: false}); 
 var csvFilename = "report.csv";
-var imagecsvFilename = "imgReport.csv";
 
 var cloudmersive;
 var moderateContent;
@@ -27,7 +28,6 @@ var clPost;
 var modcontent_get;
 
 var Report = path.join(__dirname,'', 'report.csv')
-var imageReport = path.join(__dirname, '', 'imgReport.csv')
 
 //Start Handler
 bot.on('start', () => {
@@ -264,26 +264,30 @@ async function reportLogs(filepath){
 
 //To report the person who uploaded inappropriate content
 async function reportPerson(){
-	const owner_id = await listIdofOwner();
 	const user_name = await listNameofUser();
-	const multiple_channels = owner_id + ",management";
-	
-	writer = csvWriter({sendHeaders: false});
-	writer.pipe(fs.createWriteStream(imagecsvFilename));
-	writer.write({
-		header1: user_name + " has posted inappropriate content. Please take necessary action."		
-	});
-	writer.end();
-	request.post({
-		url: 'https://slack.com/api/files.upload',
-		formData: {
-			token: process.env.SLACK_BOT_TOKEN,
-			channels: multiple_channels, 
-			file: fs.createReadStream(imageReport),
-			filename: "imgReport.csv",
-		}, 
-		}, function(err, response){
-	});
+	var transporter = nodemailer.createTransport(smtpTransport({
+	  service: 'gmail',
+	  host: 'smtp.gmail.com',
+	  auth: {
+	    user: 'secbotforslack@gmail.com',
+	    pass: process.env.GMAIL_PASSWORD
+	  }
+	}));
+
+	var mailOptions = {
+	  from: 'secbotforslack@gmail.com',
+	  to: 'hrforslack@gmail.com',
+	  subject: 'Complaint against ' + user_name,
+	  text: user_name + ' has posted inappropriate content. Please take necessary action.'
+	};
+
+	transporter.sendMail(mailOptions, function(error, info){
+	  if (error) {
+	    console.log(error);
+	  } else {
+	    console.log('Email sent: ' + info.response);
+	  }
+	}); 
 }
 
 //Delete a file
