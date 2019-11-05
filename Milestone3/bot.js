@@ -5,7 +5,6 @@ const fs = require('fs');
 const SlackBot = require('slackbots');
 const path = require('path');
 
-var nock = require("nock");
 var newurl;
 
 const image_types = ["jpeg" , "jpg" , "jpe" , "jfif" , "jif" , "jfi" , "png" , "svg" , "webp" , "tiff" , "tif" , "psd" , "raw" , "arw" , "cr2" , "nrw" , "k25" , "bmp"] 
@@ -22,11 +21,9 @@ var writer = csvWriter({sendHeaders: false});
 var csvFilename = "report.csv";
 var imagecsvFilename = "imgReport.csv";
 
-var virusTotal;
+var cloudmersive;
 var moderateContent;
-var vtGet;
-var vtPost;
-var vt_json = {"queued": true};
+var clPost;
 var modcontent_get;
 
 var Report = path.join(__dirname,'', 'report.csv')
@@ -71,37 +68,6 @@ bot.on('message', (data) => {
 				}, function(err, response){
 			});
 			
-			
-			//Setting Mock response from VirusTotal API
-			if ((data["files"][0]['name']).match(/corrupted/i)){ 
-				virusTotal = {virus : true };
-			}
-			else
-				virusTotal = {virus : false};	
-		 	const options = {
-		  		headers: {
-		    			'Content-Type': 'application/json'
-		  		}
-			}
-		
-			//Using nock to intercept virusTotal POST request
-			var mockPostVt = nock("https://www.virustotal.com")
-			   .persist() 
-			   .post('/vtapi/v2/url/scan', {
-				apikey: 'abcd1234',  //Random API key
-				url: 'https://thencsu.slack.com/files/'+ user_id + '/'+ file + '/' + file_name
-			   })
-			   .reply(200, JSON.stringify(vt_json.queued));
-
-			//Using nock to intercept virusTotal GET request
-			var mockGetVt = nock("https://www.virustotal.com")
-			   .persist() 
-			   .get('/vtapi/v2/url/report', {
-				apikey: 'abcd1234',   //Random API key
-				resource: 'https://thencsu.slack.com/files/'+ user_id + '/'+ file + '/' + file_name
-			   })
-			   .reply(200, JSON.stringify(virusTotal.virus));
-
 			//To check for corrupt files and inappropriate images 	
 			fileCheck(file, user_id, file_name, filetype, permalink);	
 		}
@@ -116,12 +82,13 @@ bot.on('message', (data) => {
 });
 
 async function fileCheck(file, user_id, file_name, filetype, permalink){
-	//Checking a file or an image if it is corrupted
-	vtPost = await virusTotalScan(user_id);
-	if (vtPost.match(/true/i))
-		vtGet = await virusTotalReport(user_id);		
-	if (vtGet.match(/true/i)){
-		bot.postMessageToChannel('general', "The file is corrupted");
+	//Checking if a file or an image is corrupted
+	clPost = await cloudMersiveScan(user_id, file, file_name, permalink);
+	cleanResult = clPost.CleanResult;
+	threatType = clPost.WebsiteThreatType;
+
+	if (cleanResult == false){
+		bot.postMessageToChannel('general', "The file [" + file_name + "] has WebsiteThreatType [" + threatType + "]. SecBot will delete the file");
 		//To log the name of the user and file name in a csv file
 		createReport(file_name);
 		//To delete the image if it contains virus
@@ -129,12 +96,14 @@ async function fileCheck(file, user_id, file_name, filetype, permalink){
 		//To report logs 
 		report();
 	}
+
 	//Checking if an image is inappropriate
 	if (image_types.includes(filetype)){
 		modcontent_get = await inappropriateCheck(user_id, file, file_name, permalink);
 		rating=modcontent_get.rating_letter;	
 	}
-	if (vtGet.match(/false/i)){
+
+	if (cleanResult == true){
 		if (image_types.includes(filetype) && rating != 'a')
 			bot.postMessageToChannel('general', 'Scanning complete. Image safe to download.')
 		else if(image_types.includes(filetype) && rating == 'a'){
@@ -149,35 +118,35 @@ async function fileCheck(file, user_id, file_name, filetype, permalink){
 	}
 }
 
-//To upload a file for virus scan
-function virusTotalScan(user_id){
+//To check if the public/external URL of a file uploaded on Slack has malware
+function cloudMersiveScan(user_id, file, file_name, permalink){
+	//Changing file name according to URL format
+        fileName = file_name.toLowerCase();
+        fileName1 = fileName.replace(" ", "_");
+
+        //URL link to upload on CloudMersive API
+        linkArray = permalink.split('/')
+        splitArray = linkArray[3].split('-')
+        newurl = linkArray[0] + '//files.slack.com/files-pri/' + splitArray[0] + '-' + splitArray[1] +'/download/' + fileName1 + '?pub_secret=' + splitArray[2]
+
+	//Getting response from CloudMersive API
 	return new Promise(function(resolve, reject){
-		request.post({
-			url: "https://www.virustotal.com/vtapi/v2/url/scan",
-			form: {
-				apikey: "abcd1234", //Random API key
-				url: 'https://thencsu.slack.com/files/'+ user_id + '/'+ file + '/' + file_name
-		},
-		},function(options, response) {
-		resolve(JSON.stringify(response.body));
+		const options5 = {
+			url : 'https://api.cloudmersive.com/virus/scan/website',
+			method : 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+				'Accept': 'application/json',
+				'Apikey': process.env.URLSCANAPIKEY},
+			body: JSON.stringify({"Url" : newurl})
+		};
+		request(options5, function(err, res, body) {
+	 		clPost = JSON.parse(body);
+			resolve(clPost);
 		});
 	});
 }
 
-//To get the report of scanned file
-function virusTotalReport(user_id){
-	return new Promise(function(resolve, reject){
-		request.get({
-			url: "https://www.virustotal.com/vtapi/v2/url/report",
-			form: {
-				apikey: 'abcd1234', //Random API key
-				resource: 'https://thencsu.slack.com/files/'+ user_id + '/'+ file + '/' + file_name
-		}, 
-		}, function(options, response) {
-			resolve(JSON.stringify(response.body));
-		});
-	});
-}		
 
 //To check if an image is inappropriate using API
 function inappropriateCheck(user_id, file, file_name, permalink){
