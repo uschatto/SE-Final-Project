@@ -4,6 +4,7 @@ requestp = require('request-promise')
 const fs = require('fs');
 const SlackBot = require('slackbots');
 const path = require('path');
+
 var nodemailer = require('nodemailer');
 var smtpTransport = require('nodemailer-smtp-transport');
 
@@ -32,16 +33,6 @@ var Report = path.join(__dirname,'', 'report.csv')
 //Start Handler
 bot.on('start', () => {
 	bot.postMessageToChannel('general', 'Be Assured. Be Secured.');
-	// If CSV file does not exist, create it and add the headers
-	if (!fs.existsSync(csvFilename)) {
-		writer = csvWriter({sendHeaders: false});
-	  	writer.pipe(fs.createWriteStream(csvFilename));
-	  	writer.write({
-	    		header1: 'MEMBER NAME',
-	    		header2: 'FILE NAME'
-	  	});
-	  	writer.end();
-	} 
 });
 
 //Error Handler
@@ -82,8 +73,12 @@ bot.on('message', (data) => {
 });
 
 async function fileCheck(file, user_id, file_name, filetype, permalink){
+	var isImage;
 	//Checking if a file or an image is corrupted
-	clPost = await cloudMersiveScan(user_id, file, file_name, permalink);
+	if (image_types.includes(filetype)){
+		isImage = "Y";
+	}
+	clPost = await cloudMersiveScan(user_id, file, file_name, permalink, isImage);
 	cleanResult = clPost.CleanResult;
 	threatType = clPost.WebsiteThreatType;
 
@@ -120,7 +115,7 @@ async function fileCheck(file, user_id, file_name, filetype, permalink){
 }
 
 //To check if the public/external URL of a file uploaded on Slack has malware
-function cloudMersiveScan(user_id, file, file_name, permalink){
+function cloudMersiveScan(user_id, file, file_name, permalink, isImage){
 	//Changing file name according to URL format
         fileName = file_name.toLowerCase();
         fileName1 = fileName.replace(" ", "_");
@@ -128,8 +123,14 @@ function cloudMersiveScan(user_id, file, file_name, permalink){
         //URL link to upload on CloudMersive API
         linkArray = permalink.split('/')
         splitArray = linkArray[3].split('-')
-        newurl = linkArray[0] + '//files.slack.com/files-pri/' + splitArray[0] + '-' + splitArray[1] +'/download/' + fileName1 + '?pub_secret=' + splitArray[2]
-
+	if (isImage == "Y")
+	{
+        	newurl = linkArray[0] + '//files.slack.com/files-pri/' + splitArray[0] + '-' + splitArray[1] +'/' + fileName1 + '?pub_secret=' + splitArray[2]
+	}
+	else
+	{
+		newurl = linkArray[0] + '//files.slack.com/files-pri/' + splitArray[0] + '-' + splitArray[1] +'/download/' + fileName1 + '?pub_secret=' + splitArray[2]
+	}
 	//Getting response from CloudMersive API
 	return new Promise(function(resolve, reject){
 		const options5 = {
@@ -181,7 +182,7 @@ function inappropriateCheck(user_id, file, file_name, permalink){
 async function reportOnDemand(user_identity){
 	const owner_id = await listIdofOwner();
 	if (user_identity == owner_id){
-		reportLogs(Report);
+		reportLogs();
 	}
 }
 
