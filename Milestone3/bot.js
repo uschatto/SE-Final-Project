@@ -1,19 +1,15 @@
 require('dotenv').config();
 request = require('request');
-requestp = require('request-promise')
-const fs = require('fs');
 const SlackBot = require('slackbots');
-const path = require('path');
 const {table} = require('table');
-
-
 var nodemailer = require('nodemailer');
 var smtpTransport = require('nodemailer-smtp-transport');
 var mysql = require("mysql");
 
+var threshold=10;
 var newurl;
 
-const image_types = ["jpeg", "jpg", "png", "bmp", "gif", "webp"]
+const image_types = ["jpeg", "jpg", "png", "bmp", "gif", "webp"];
 
 const bot = new SlackBot({
 	
@@ -51,35 +47,26 @@ bot.on('error', (err) => {console.log(err)});
 
 //Message Handler
 bot.on('message', (data) => {
-	if("files" in data ) {
-		if (data["files"][0]['name'] !== 'report.csv' && data["files"][0]['name'] !== 'imgReport.csv'){
-			//To retrieve file ID, user ID, file name and file type		
-			file = data["files"][0]['id'];      
-			user_id = data["files"][0]['user']; 
-			file_name = data["files"][0]['name'];
-			permalink = data["files"][0]['permalink_public']
-			filetype = data["files"][0]['filetype'].toLowerCase();
+	if("files" in data ){
+		//To retrieve file ID, user ID, file name and file type		
+		file = data["files"][0]['id'];      
+		user_id = data["files"][0]['user']; 
+		file_name = data["files"][0]['name'];
+		permalink = data["files"][0]['permalink_public']
+		filetype = data["files"][0]['filetype'].toLowerCase();
 
-			//To enable public file sharing
-			request.post({
-				url: 'https://slack.com/api/files.sharedPublicURL',
-				formData: {
-					token: process.env.SLACK_ACCESS_TOKEN,
-					file: file //fileID
-				}, 
-				}, function(err, response){
-			});
+		//To enable public file sharing
+		request.post({
+			url: 'https://slack.com/api/files.sharedPublicURL',
+			formData: {
+				token: process.env.SLACK_ACCESS_TOKEN,
+				file: file //fileID
+			}, 
+			}, function(err, response){
+		});
 			
-			//To check for corrupt files and inappropriate images 	
-			fileCheck(file, user_id, file_name, filetype, permalink);	
-		}
-	}
-	else if("text" in data){
-		//Report to primary owner and 'management' channel on demand 
-		if(data["text"] == 'Send the corrupted files report'){
-			var user_identity = data["user"];
-			reportOnDemand(user_identity);
-		}
+		//To check for corrupt files and inappropriate images 	
+		fileCheck(file, user_id, file_name, filetype, permalink);	
 	}
 });
 
@@ -121,7 +108,7 @@ async function fileCheck(file, user_id, file_name, filetype, permalink){
 			reportPerson();			
 		}
 		else
-			bot.postMessageToChannel('general', 'Scanning complete. File safe to download.')
+			bot.postMessageToChannel('general', 'Scanning complete. File safe to download.');	
 	}
 }
 
@@ -189,18 +176,10 @@ function inappropriateCheck(user_id, file, file_name, permalink){
 	});	
 }		
 
-//Sending report on demand to the primary owner
-async function reportOnDemand(user_identity){
-	const owner_id = await listIdofOwner();
-	if (user_identity == owner_id){
-		reportLogs();
-	}
-}
-
 //To report user name and file name if a threshold is reached
 async function report(){
 	const count = await totalEntries();
-	if(count >= 10){
+	if(count >= threshold){
 		const response_res = reportLogs();
 	}
 }
@@ -218,25 +197,6 @@ function listNameofUser(){
 }
 
 
-//To get the ID of the primary owner
-function listIdofOwner(){
-	token = process.env.SLACK_BOT_TOKEN;
-	return new Promise(function(resolve, reject){
-		request.get('https://slack.com/api/users.list?token=' + token + '&pretty=1', function(error, response, body){
-		const info = JSON.parse(body);
-		if ("members" in info){
-			i = 0;
-			while(info.members[i].is_primary_owner === false){
-				i = i+1;
-			}
-			owner_id = info.members[i].id;
-		}
-		resolve(owner_id);
-		});
-
-	});
-}
-
 //To log the entries in the database 
 async function createReport(file_name){
 	const result = await listNameofUser();
@@ -251,8 +211,30 @@ async function createReport(file_name){
 
 //Reporting the logs
 async function reportLogs(){
+	const user_name = await listNameofUser();
 	const data = await getDataFromDB();
+	console.log(data);
 	//Placeholder for Sending email to IT department
+	var transporter = nodemailer.createTransport(smtpTransport({
+	  service: 'gmail',
+	  host: 'smtp.gmail.com',
+	  auth: {
+	    user: 'secbotforslack@gmail.com',
+	    pass: process.env.GMAIL_PASSWORD
+	  }
+	}));
+
+	var mailOptions = {
+	  from: 'secbotforslack@gmail.com',
+	  to: 'itdepartmentforslack@gmail.com',
+	  subject: 'Complaint against ' + user_name,
+	  text: data
+	};
+	transporter.sendMail(mailOptions, function(error, info){
+	  if (error) {
+	    console.log(error);
+	  }
+	}); 
 }
 
 //To report the person who uploaded inappropriate content
@@ -308,9 +290,12 @@ function totalEntries(){
 //To get the report from database and format it into tabular format
 function getDataFromDB(){
 	return new Promise(function(resolve, reject){
-		var output;                                                                                                                                                         var temp = [];
+		var output; 
+		var temp = [];
         	con.query("SELECT * FROM REPORT", function (err, result, fields) {
-                	if (err) throw err;                                                                                                                                                 data = JSON.parse(JSON.stringify(result));
+                	if (err) throw err;                                                                                                                                                 
+			data = JSON.parse(JSON.stringify(result));
+			console.log(data);
                 	data.forEach(function(value){
 				row = [];
 				Object.keys(value).map(function(key){
@@ -318,7 +303,7 @@ function getDataFromDB(){
 				});
 				temp.push(row);
                 	});
-			output = table(temp,options);
+			output = table(temp);
                 	resolve(output);
 		}); 
 	});
