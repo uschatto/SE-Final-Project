@@ -4,9 +4,12 @@ requestp = require('request-promise')
 const fs = require('fs');
 const SlackBot = require('slackbots');
 const path = require('path');
+const {table} = require('table');
+
 
 var nodemailer = require('nodemailer');
 var smtpTransport = require('nodemailer-smtp-transport');
+var mysql = require("mysql");
 
 var newurl;
 
@@ -19,16 +22,24 @@ const bot = new SlackBot({
 });
 
 var name_log;
-var csvWriter = require('csv-write-stream');
-var writer = csvWriter({sendHeaders: false}); 
-var csvFilename = "report.csv";
 
 var cloudmersive;
 var moderateContent;
 var clPost;
 var modcontent_get;
 
-var Report = path.join(__dirname,'', 'report.csv')
+//Create database connection
+var con = mysql.createConnection({
+  host: "localhost",
+  user: process.env.DB_USER,
+  password: process.env.DB_PASS,
+  database: "SECBOT"
+});
+
+con.connect(function(err) {
+  if (err) throw err;
+});
+
 
 //Start Handler
 bot.on('start', () => {
@@ -188,18 +199,9 @@ async function reportOnDemand(user_identity){
 
 //To report user name and file name if a threshold is reached
 async function report(){
-	if(totalEntries() >= 20){
-		const response_res = await reportLogs(Report);
-		fs.writeFileSync(Report, '', function(){console.log('done')});
-		if(totalEntries() <= 0){	
-			writer = csvWriter({sendHeaders: false});
-			writer.pipe(fs.createWriteStream(csvFilename));
-			writer.write({
-				 header1: 'MEMBER NAME',
-				 header2: 'FILE NAME'
-			});
-			writer.end();
-		}
+	const count = await totalEntries();
+	if(count >= 10){
+		const response_res = reportLogs();
 	}
 }
 
@@ -235,33 +237,22 @@ function listIdofOwner(){
 	});
 }
 
-//To log the entries in a csv file 
+//To log the entries in the database 
 async function createReport(file_name){
 	const result = await listNameofUser();
-	writer = csvWriter({sendHeaders: false});
-	writer.pipe(fs.createWriteStream(csvFilename, {flags: 'a'}));
-	writer.write({
-		header1: result,
-		header2: file_name		
-	});
-	writer.end();
+	var values  = [
+		[result,file_name]];
+	var sql = "INSERT INTO REPORT (username, filename) VALUES ?";
+  	con.query(sql, [values], function (err, result) 
+	{
+    		if (err) throw err;
+  	});
 }
 
 //Reporting the logs
-async function reportLogs(filepath){
-	const owner_id = await listIdofOwner();
-	const multiple_channels = owner_id + ",management";
-	return requestp.post({
-		url: 'https://slack.com/api/files.upload',
-		formData: {
-			token: process.env.SLACK_BOT_TOKEN,
-			channels: multiple_channels,
-			file: fs.createReadStream(filepath),
-			filename: "report.csv",
-			title: "report.csv",
-		},
-		}, function (err, response) {
-	});		
+async function reportLogs(){
+	const data = await getDataFromDB();
+	//Placeholder for Sending email to IT department
 }
 
 //To report the person who uploaded inappropriate content
@@ -282,7 +273,6 @@ async function reportPerson(){
 	  subject: 'Complaint against ' + user_name,
 	  text: user_name + ' has posted inappropriate content. Please take necessary action.'
 	};
-
 	transporter.sendMail(mailOptions, function(error, info){
 	  if (error) {
 	    console.log(error);
@@ -301,11 +291,35 @@ function deleteFile(file){
 	});
 }
 
-//To get number of CSV file entries
+//To get number of entries in SECBOT.REPORT table
 function totalEntries(){
-	var csvFile = fs.readFileSync(Report);
-	to_string = csvFile.toString();
-	lines = to_string.split('\n');
-	var rowsn = lines.length-1;
-	return rowsn;
+	 return new Promise(function(resolve, reject){
+		var rowsn = 'SELECT COUNT(*) as cnt from REPORT';
+        	var count;
+        	con.query(rowsn, function (err,rows,result)
+        	{
+                	if (err) throw err;
+                	count = rows[0].cnt;
+                	resolve(count);
+        	});
+	});
+}
+
+//To get the report from database and format it into tabular format
+function getDataFromDB(){
+	return new Promise(function(resolve, reject){
+		var output;                                                                                                                                                         var temp = [];
+        	con.query("SELECT * FROM REPORT", function (err, result, fields) {
+                	if (err) throw err;                                                                                                                                                 data = JSON.parse(JSON.stringify(result));
+                	data.forEach(function(value){
+				row = [];
+				Object.keys(value).map(function(key){
+                                	row.push(value[key]);
+				});
+				temp.push(row);
+                	});
+			output = table(temp,options);
+                	resolve(output);
+		}); 
+	});
 }
