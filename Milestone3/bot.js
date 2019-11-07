@@ -6,7 +6,7 @@ var nodemailer = require('nodemailer');
 var smtpTransport = require('nodemailer-smtp-transport');
 var mysql = require("mysql");
 
-var threshold=10;
+var threshold=2;
 var newurl;
 
 const image_types = ["jpeg", "jpg", "png", "bmp", "gif", "webp"];
@@ -89,15 +89,13 @@ async function fileCheck(file, user_id, file_name, filetype, permalink){
 		//To report logs 
 		report();
 	}
-
-	//Checking if an image is inappropriate
-	if (image_types.includes(filetype)){
-		modcontent_get = await inappropriateCheck(user_id, file, file_name, permalink);
-		prediction = modcontent_get.predictions;
-		adult_prediction = prediction['adult'];
-	}
-
-	if (cleanResult == true){
+	else{
+		//Checking if an image is inappropriate
+		if (image_types.includes(filetype)){
+			modcontent_get = await inappropriateCheck(user_id, file, file_name, permalink);
+			prediction = modcontent_get.predictions;
+			adult_prediction = prediction['adult'];
+		}
 		if (image_types.includes(filetype) && adult_prediction < 10)
 			bot.postMessageToChannel('general', 'Scanning complete. Image safe to download.')
 		else if(image_types.includes(filetype) && adult_prediction >= 10){
@@ -180,7 +178,8 @@ function inappropriateCheck(user_id, file, file_name, permalink){
 async function report(){
 	const count = await totalEntries();
 	if(count >= threshold){
-		const response_res = reportLogs();
+		const response_res = await reportLogs();
+		await deleteDataFromDB();	
 	}
 }
 
@@ -213,7 +212,7 @@ async function createReport(file_name){
 async function reportLogs(){
 	const user_name = await listNameofUser();
 	const data = await getDataFromDB();
-	console.log(data);
+
 	//Placeholder for Sending email to IT department
 	var transporter = nodemailer.createTransport(smtpTransport({
 	  service: 'gmail',
@@ -227,7 +226,7 @@ async function reportLogs(){
 	var mailOptions = {
 	  from: 'secbotforslack@gmail.com',
 	  to: 'itdepartmentforslack@gmail.com',
-	  subject: 'Complaint against ' + user_name,
+	  subject: 'REPORT FOR CORRUPTED FILES/IMAGES',
 	  text: data
 	};
 	transporter.sendMail(mailOptions, function(error, info){
@@ -306,5 +305,13 @@ function getDataFromDB(){
 			output = table(temp);
                 	resolve(output);
 		}); 
+	});
+}
+
+//To delete data from the database after sending an email to the IT department
+function deleteDataFromDB(){
+	return new Promise(function(resolve, reject){
+		con.query("DELETE FROM REPORT", function (err, fields) {
+                        if (err) throw err;});
 	});
 }
