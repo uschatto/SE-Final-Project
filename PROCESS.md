@@ -25,7 +25,7 @@ Stories assigned at the beginning of this milestone in github.
 
 ## SCRUMBAN
 The core software process that we used was 'pair programming'. We followed scrumban methodology and tracked our progress. We created 10 stories to be completed by the end of this milestone of which 8 were done in pairs.
-After a task was done, we discussed how we did it and if the pair faced any obstacles in their task. A detailed description of our work is given below:
+After a task was done, we discussed how we did it, if the pair faced any obstacles in their task and what is to be done next by the pair. A detailed description of our work is given below:
 
 ### Iteration 1 : 
 
@@ -40,6 +40,7 @@ Things to note:
 
 ### Iteration 2 : 
 
-(Niveditha Shankar and Sruthi Kannan)
+#### Niveditha Shankar and Sruthi Kannan
+In the second iteration, we sent emails to the HR and IT team, depending on the usecase. For this, we used node-mailer  and nodemailer-smtp-transport modules. If an inappropriate image was detected, the name of the person who posted the image is retrieved and an email is sent to the HR team immediately. If a corrupted file or image is detected and number of such files exceeds the threshold set, a report consisting of the name of the person who posted such files and the respective file names are sent via email to the IT team. This part was straightforward and we did not face any issues.
 
 (Ramandeep Kaur and Udita)
