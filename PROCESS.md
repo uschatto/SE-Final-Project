@@ -19,6 +19,7 @@ Stories assigned at the beginning of this milestone in GitHub.
 
 | Story   | Item/Status   |  Issues/Tasks
 | ------------- | ------------  |  ------------
+|  VirusTotal API Integration    | Completed | [Story Link](https://github.ncsu.edu/csc510-fall2019/CSC510-8/projects/1#card-14327)
 |  Implement file Scanning  | Completed | [Story Link](https://github.ncsu.edu/csc510-fall2019/CSC510-8/projects/1#card-14351)
 |  Logging the data (Database Integration)   | Completed | [Story Link](https://github.ncsu.edu/csc510-fall2019/CSC510-8/projects/1#card-14633)
 |  Send Email to HR   | Completed | [Story Link](https://github.ncsu.edu/csc510-fall2019/CSC510-8/projects/1#card-14640)
@@ -35,10 +36,11 @@ A detailed description of our work is given below:
 We checked how an image file can be uploaded to ModerateContent API and how their response can be parsed in our bot integration. First, we analysed the way ModerateContent API categorises appropriate and inappropriate content before moving on to the implementation. When we tried to implement image scanning, we faced a few issues. We could not get the right public URL of the image uploaded in slack. It took a considerable amount of time to figure out the right image URL that can be given to ModerateContent. We took the help of the support team of the API for this part. Once this was sorted, we were able to integrate ModerateContent API with our SecBot smoothly. 
 
 Things to note:
-- The images marked as inappropriate by out bot might hold adult content or extreme violence and bloodshed.
+- The images marked as inappropriate by our bot might hold adult content or extreme violence and bloodshed.
 - The image formats that ModerateContent API (and hence our bot too) accept are "jpeg", "jpg", "png", "bmp", "gif", "webp".
 
-#### Ramandeep Kaur and Udita
+#### Ramandeep Kaur and Udita Chattopadhyay
+Our end goal for this iteration was to come up with a way to detect virus/malware in the file uploads to the Slack channel. We came across VirusTotal API and started testing the URLs of the file uploads. It took us some time to figure out the incapabilities of this API to detect malware in the URL comprising of a virus infected file. The issue here was the downloaded file might be flagged by the antivirus signatures but the corresponding URL scanner might still have no knowledge that a given URL is distributing such file. We confirmed the same with the support team of the API over email. We decided on finishing the VirusTotal API integration in this iteration however because of the above mentioned issue we moved the story to Review. Then we came across another API called CloudMersive which serves the same purpose of detecting virus in the download URL of the file. 
 
 
 ### Iteration 2 : 
@@ -46,8 +48,8 @@ Things to note:
 #### Niveditha Shankar and Sruthi Kannan
 In the second iteration, we sent emails to the HR and IT team, depending on the usecase. For this, we used node-mailer  and nodemailer-smtp-transport modules. If an inappropriate image was detected, the name of the person who posted the image is retrieved and an email is sent to the HR team immediately. If a corrupted file or image is detected and number of such files exceeds the threshold set, a report consisting of the name of the person who posted such files and the respective file names are sent via email to the IT team. This part was straightforward and we did not face any issues.
 
-#### Ramandeep Kaur and Udita
-
+#### Ramandeep Kaur and Udita Chattopadhyay
+In this iteration we decided to go ahead with CloudMersive API for virus/malware detection purpose. We managed to integrate it with our Slack platform and were able to parse the response given by the API to flag a file or an image as virus/malware infected or not. On detecting the presence of virus in the file or an image we delete the file from the Slack channel. Our final use case was reporting to the HR/IT department regarding the inappropriate content or the malware file uploads on the Slack channel. This involved maintaining a record of the wrongdoers. We hosted a mySql server for this purpose and logged all records in the database. This was used to create and send reports to the concerned recipients and also clear the database on reaching a threshold level. 
 
 A screenshot of the completed tasks is attached below:
 
@@ -66,3 +68,13 @@ From our experience of pair programming, we found some pros and cons.
 **CONS:**
 
 - Since most of the tasks involved pair programming, it was essential that both of them were free at the same time.
+
+**SINGLE CODE BASE:**
+
+The corollary software process that we used was 'single code base'. We divided the deliverables in terms on four different functionalities namely:
+- Integrating CloudMersive API to detect malware
+- Integrating ModerateContent API to detect inappropriate content
+- Integrating MySql server for logging records of the wrongdoers
+- Integration Gmail API for sending emails to HR/IT department
+
+All of the above tasks needed independent work and attention. Therefore we decided on committing all our code changes to the master  branch itself therefore maintaining a single code base.
