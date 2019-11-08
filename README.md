@@ -13,3 +13,5 @@
 > [**DESIGN.MD**](https://github.ncsu.edu/csc510-fall2019/CSC510-8/blob/master/Design.md)
 
 > [**BOT.MD**](https://github.ncsu.edu/csc510-fall2019/CSC510-8/blob/master/Bot.md)
+
+> [**PROCESS.MD**](https://github.ncsu.edu/csc510-fall2019/CSC510-8/blob/master/Process.md)
