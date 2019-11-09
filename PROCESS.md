@@ -2,7 +2,9 @@
 
 ## SCRUMBAN
 
-<p align="justify">Scrumban methodology was followed to track the team's progress. 10 stories were created to be completed by the end of this milestone of which 8 were done in pairs. Tasks were delegated equally among the team members. The kanban board was continously updated and the tasks were moved from - TO DO, IN PROGRESS and DONE. Another category called REVIEW was added and tasks which were a bit difficult to finish were moved to this category. After a task was completed, we discussed how the pair implemented it, if the pair faced any obstacles in their task and what is to be done next by the pair. The kanban board gave us a clear picture of what each member had to do. The structured planning helped us complete the tasks efficiently.Stories assigned at the beginning of this milestone in GitHub.</p>
+<p align="justify">Scrumban methodology was followed to track the team's progress. 10 stories were created to be completed by the end of this milestone of which 8 were done in pairs. Tasks were delegated equally among the team members. The kanban board was continously updated and the tasks were moved from - TO DO, IN PROGRESS and DONE. Another category called REVIEW was added and tasks which were a bit difficult to finish were moved to this category. After a task was completed, we discussed how the pair implemented it, if the pair faced any obstacles in their task and what is to be done next by the pair. The kanban board gave us a clear picture of what each member had to do. The structured planning helped us complete the tasks efficiently.
+
+Stories assigned at the beginning of this milestone in GitHub.</p>
 
 ### <a name="1st Iteration"></a> 1st Iteration
 
@@ -23,7 +25,7 @@
 |  Logging the data (Database Integration)   | Completed | [Story Link](https://github.ncsu.edu/csc510-fall2019/CSC510-8/projects/1#card-14633)
 |  Send Email to HR   | Completed | [Story Link](https://github.ncsu.edu/csc510-fall2019/CSC510-8/projects/1#card-14640)
 |  Send Email to IT team   | Completed | [Story Link](https://github.ncsu.edu/csc510-fall2019/CSC510-8/projects/1#card-14643)
-|  Archive the report file after sending an email   | Completed | [Story Link](https://github.ncsu.edu/csc510-fall2019/CSC510-8/projects/1#card-14637)
+|  Refresh the report file in database after sending an email   | Completed | [Story Link](https://github.ncsu.edu/csc510-fall2019/CSC510-8/projects/1#card-14637)
 |  Testing the working of file/image scanning   | Completed | [Story Link](https://github.ncsu.edu/csc510-fall2019/CSC510-8/projects/1#card-14646)
 
 
