@@ -6,7 +6,7 @@ var nodemailer = require('nodemailer');
 var smtpTransport = require('nodemailer-smtp-transport');
 var mysql = require("mysql");
 
-var threshold=2;
+var threshold = 1;
 var newurl;
 
 const image_types = ["jpeg", "jpg", "png", "bmp", "gif", "webp"];
@@ -23,6 +23,7 @@ var cloudmersive;
 var moderateContent;
 var clPost;
 var modcontent_get;
+var i;
 
 //Create database connection
 var con = mysql.createConnection({
@@ -48,12 +49,16 @@ bot.on('error', (err) => {console.log(err)});
 //Message Handler
 bot.on('message', (data) => {
 	if("files" in data ){
+		number_files = data["files"].length
+		for(i = 0; i < number_files; i++){
 		//To retrieve file ID, user ID, file name and file type		
-		file = data["files"][0]['id'];      
-		user_id = data["files"][0]['user']; 
-		file_name = data["files"][0]['name'];
-		permalink = data["files"][0]['permalink_public']
-		filetype = data["files"][0]['filetype'].toLowerCase();
+		file = data["files"][i]['id'];      
+		console.log(file);
+		user_id = data["files"][i]['user']; 
+		console.log(user_id);
+		file_name = data["files"][i]['name'];
+		permalink = data["files"][i]['permalink_public']
+		filetype = data["files"][i]['filetype'].toLowerCase();
 
 		//To enable public file sharing
 		request.post({
@@ -67,6 +72,7 @@ bot.on('message', (data) => {
 			
 		//To check for corrupt files and inappropriate images 	
 		fileCheck(file, user_id, file_name, filetype, permalink);	
+		}
 	}
 });
 
@@ -81,13 +87,13 @@ async function fileCheck(file, user_id, file_name, filetype, permalink){
 	threatType = clPost.WebsiteThreatType;
 
 	if (cleanResult == false){
-		bot.postMessageToChannel('general', "The file [" + file_name + "] has WebsiteThreatType [" + threatType + "]. SecBot will delete the file");
+		bot.postMessageToChannel('general', "The file [" + file_name + "] has WebsiteThreatType [" + threatType + "]. SecBot will delete the file.");
 		//To log the name of the user and file name in a csv file
-		createReport(file_name);
+		createReport(file_name,file);
 		//To delete the image if it contains virus
-		deleteFile(file);
+		//deleteFile(file);
 		//To report logs 
-		report();
+		//report();
 	}
 	else{
 		//Checking if an image is inappropriate
@@ -97,16 +103,16 @@ async function fileCheck(file, user_id, file_name, filetype, permalink){
 			adult_prediction = prediction['adult'];
 		}
 		if (image_types.includes(filetype) && adult_prediction < 10)
-			bot.postMessageToChannel('general', 'Scanning complete. Image safe to download.')
+			bot.postMessageToChannel('general', "Scanning complete. Image [" + file_name + "] safe to download.")
 		else if(image_types.includes(filetype) && adult_prediction >= 10){
-			bot.postMessageToChannel('general', 'Image is inappropriate');				
+			bot.postMessageToChannel('general', "The image [" + file_name + "] is inappropriate. SecBot will delete the file.");				
 			//To delete the image if it is inappropriate
 			deleteFile(file);
 			//To report the person who uploaded the image
 			reportPerson();			
 		}
 		else
-			bot.postMessageToChannel('general', 'Scanning complete. File safe to download.');	
+			bot.postMessageToChannel('general', "Scanning complete. File [" + file_name + "] safe to download.");	
 	}
 }
 
@@ -197,7 +203,7 @@ function listNameofUser(){
 
 
 //To log the entries in the database 
-async function createReport(file_name){
+async function createReport(file_name,file){
 	const result = await listNameofUser();
 	var values  = [
 		[result,file_name]];
@@ -206,6 +212,9 @@ async function createReport(file_name){
 	{
     		if (err) throw err;
   	});
+	await deleteFile(file);
+	await report();
+
 }
 
 //Reporting the logs
