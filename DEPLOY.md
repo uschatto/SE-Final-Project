@@ -1,5 +1,17 @@
 # DEPLOY
 
+Our Bot is deployed on AWS EC2 instance and is up and running.
+
+## DEPLOYMENT SCRIPTS
+The [yaml playbook](https://github.ncsu.edu/csc510-fall2019/CSC510-8/blob/master/Milestone4/INITIAL_CONFIGURATION.yml) is used to fully provision and configure a remote environment for our bot. The playbook will do the following tasks :
+- Install nodejs
+- Install forever
+- Install mySQL and setup the database
+- Install npm packages
+- Set Environment variables for API keys,gmail passwords,database credentials,threshold value,workspace URL
+- Start the bot with forever
+
+
 ## INSTRUCTIONS FOR ACCEPTANCE TESTING
 We have deployed our SecBot in the following Slack [channel](https://thencsu.slack.com). The users and their credentials that can be used to login to the channel are given below,
 
@@ -16,13 +28,13 @@ Secbot has already been invited to the channel. Doing @secbot is not needed.
 ```
 - Upload a file to the channel. 
 - Wait for the bot to respond with the message 'Scanning complete. File <filename> safe to download' to download and view the file. 
-- If the file contains virus, the Bot will respond with the message, 'The file <filename> has <threat type>. SecBot will delete the file. 
+- If the file contains virus, the Bot will respond with the message, 'The file <file-name> has WebsiteThreatType <threat-type> and VirusName <virus-name>.SecBot will delete the file.' 
 - The bot will go on to delete the file.
 ```
   
 #### USECASE 2: Check if an image is inappropriate
 ```
-- Upload an image to the channel. 
+- Upload an image to the channel.Note the image has to be one of these types - "jpeg","jpg","png","bpm","gif","webp" .
 - Wait for the bot to respond with the message 'Scanning complete. Image <imagename> safe to download' to download and view the file. 
 - If the image is inappropriate(and not corrupted), the Bot will respond with the message, 'The image <imagename> is inappropriate. SecBot will delete the image. 
 - The bot will go on to delete the image.
@@ -41,3 +53,10 @@ Secbot has already been invited to the channel. Doing @secbot is not needed.
   IT:
      email: itdepartmentforslack@gmail.com password: it1234_1234
  ```
+
+## FINAL CODE
+The [bot.js](https://github.ncsu.edu/csc510-fall2019/CSC510-8/blob/master/Milestone4/bot.js) is the main code which will take care of all the usecases.The basic overview is :
+
+- Whenever user uploads anything on slack channel, bot checks if it is a file/image and sends to the CloudMersive API to check if it contains any virus.Bot will parse the response from the API and if found a virus, then it will log into the database, check if a threshold is reached for the report(if yes it will send a report to the IT team and database will be cleared) and then it will delete the file from the channel with the message "The file <file-name> has WebsiteThreatType <threat-type> and VirusName <virus-name>.SecBot will delete the file". If no virus is found then it will send a message "Scanning Complete.File <file-name> safe to download."
+  
+- If the file/image does not have virus, then the bot checks if its an image and sends it to ModerateContent API for checking any inappropriate content. Bot will parse the response from the API and if inappropriate content is found , then it will delete the file from the channel with the message "The image <image-name> is inappropriate.SecBot will delete the file." It will send an email to the HR team. If the image is appropriate , a message will be sent to the channel "Scanning complete. Image <image-name> safe to download."
