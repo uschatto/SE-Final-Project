@@ -1,0 +1,120 @@
+---
+- hosts: all
+  vars:
+   mysql_root_password: secbot123
+
+  tasks:
+   - name: Setup for node.js
+     shell: curl -sL https://deb.nodesource.com/setup_10.x | sudo -E bash -
+
+   - name: Install node.js
+     package:
+       name: nodejs
+       state: latest
+       allow_unauthenticated: yes
+     become: yes
+
+   - name: Install forever
+     shell: npm install -g forever
+     become: yes
+
+   - name: Install MySQL,pexpect
+     apt:
+       name: "{{ item }}"
+       update_cache: yes
+       cache_valid_time: 3600
+       state: present
+     become: yes
+     with_items:
+       - python-mysqldb
+       - mysql-server
+       - python-pexpect
+
+   - name: Start the MySQL service
+     become: yes
+     service:
+       name: mysql
+       state: started
+       enabled: true
+
+   - name: Stop MySQL
+     become: yes
+     systemd:
+       name: mysql
+       state: stopped
+
+   - name: set environment variables
+     become: yes
+     shell: systemctl set-environment MYSQLD_OPTS="--skip-grant-tables"
+
+   - name: Start MySQL
+     become: yes
+     systemd:
+       name: mysql
+       state: started
+
+   - name: Reset root password
+     become: yes
+     expect:
+       command: mysql -u root -p --execute="UPDATE mysql.user SET authentication_string = PASSWORD('{{ mysql_root_password }}') WHERE User = 'root' AND (Host = 'localhost' OR Host = '127.0.0.1');"
+       responses:
+         (?i)Enter password: "{{ mysql_root_password }}"
+
+   - name: Flush MySQL privileges
+     become: yes
+     expect:
+       command: mysql -u root -p --execute="FLUSH PRIVILEGES"
+       responses:
+         (?i)Enter password: "{{ mysql_root_password }}"
+
+   - name: Stop MySQL
+     become: yes
+     systemd:
+       name: mysql
+       state: stopped
+
+   - name: Unset environment variables
+     become: yes
+     shell: systemctl unset-environment MYSQLD_OPTS
+
+   - name: Start MySQL
+     become: yes
+     systemd:
+       name: mysql
+       state: started
+
+   - name: creating a database called SECBOT
+     become: yes
+     mysql_db:
+       name: SECBOT
+       state: present
+       login_password: "{{ mysql_root_password }}"
+       login_user: root
+
+   - name: creating a table REPORT in SECBOT database
+     become: yes
+     mysql_db:
+       name: SECBOT
+       login_password: "{{ mysql_root_password }}"
+       login_user: root
+       state: import
+       target: /tmp/REPORT.sql
+
+   - name: Setup to Install npm packages using npm install command
+     npm:
+       name: "{{ item }}"
+       path: /home/ubuntu/CSC510-8/Milestone4
+     with_items:
+       - dotenv
+       - mysql
+       - table
+       - request
+       - nodemailer
+       - nodemailer-smtp-transport
+       - slackbots
+     become: yes
+
+   - name: Run the application bot.js via forever
+     shell: source /home/ubuntu/.bash_profile && forever start /home/ubuntu/CSC510-8/Milestone4/bot.js
+     args:
+       executable: /bin/bash
