@@ -7,15 +7,24 @@
    - name: Setup for node.js
      shell: curl -sL https://deb.nodesource.com/setup_10.x | sudo -E bash -
 
-   - name: Install node.js
+   - name: Install node.js and npm
      package:
        name: nodejs
        state: latest
        allow_unauthenticated: yes
      become: yes
 
-   - name: Install forever
+   - name: Install forever via npm
      shell: npm install -g forever
+     become: yes
+
+   - name: purge and remove any mysql related data
+     apt:
+       name: mysql*
+       purge: yes
+       state: absent
+       autoremove: yes
+       autoclean: yes
      become: yes
 
    - name: Install MySQL,pexpect
@@ -37,13 +46,22 @@
        state: started
        enabled: true
 
+   - name: update mysql root password for all root accounts
+     become: yes
+     mysql_user:
+       name: root
+       password: "{{ mysql_root_password }}"
+       login_user: root
+       login_password: "{{ mysql_root_password }}"
+       priv: "*.*:ALL,GRANT"
+
    - name: Stop MySQL
      become: yes
      systemd:
        name: mysql
        state: stopped
 
-   - name: set environment variables
+   - name: set environment variables for mysql
      become: yes
      shell: systemctl set-environment MYSQLD_OPTS="--skip-grant-tables"
 
@@ -73,7 +91,7 @@
        name: mysql
        state: stopped
 
-   - name: Unset environment variables
+   - name: Unset environment variables for mysql
      become: yes
      shell: systemctl unset-environment MYSQLD_OPTS
 
@@ -91,14 +109,23 @@
        login_password: "{{ mysql_root_password }}"
        login_user: root
 
-   - name: creating a table REPORT in SECBOT database
+   - name: dropping the table REPORT (this is done to ensure if the yaml is run the second time the table gets dropped first) in SECBOT database
+     become: yes
+     mysql_db:
+       name: SECBOT
+       login_password: "{{ mysql_root_password }}"
+       login_user: root
+       state: absent
+       target: /tmp/DROPTABLE.sql
+
+   - name: creating the table REPORT in SECBOT database
      become: yes
      mysql_db:
        name: SECBOT
        login_password: "{{ mysql_root_password }}"
        login_user: root
        state: import
-       target: /tmp/REPORT.sql
+       target: /tmp/CREATETABLE.sql
 
    - name: Setup to Install npm packages using npm install command
      npm:
