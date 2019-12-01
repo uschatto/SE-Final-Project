@@ -15,3 +15,5 @@
 > [**BOT.MD**](https://github.ncsu.edu/csc510-fall2019/CSC510-8/blob/master/Bot.md)
 
 > [**PROCESS.MD**](https://github.ncsu.edu/csc510-fall2019/CSC510-8/blob/master/PROCESS.md)
+
+> [**DEPLOY.MD**](https://github.ncsu.edu/csc510-fall2019/CSC510-8/blob/master/DEPLOY.md)
