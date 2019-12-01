@@ -94,7 +94,8 @@ async function fileCheck(file, user_id, file_name, filetype, permalink, callback
         threatType = clPost.WebsiteThreatType;
 
         if (cleanResult == false){
-                bot.postMessageToChannel('general', "The file [" + file_name + "] has WebsiteThreatType [" + threatType + "]. SecBot will delete the file.");
+		virusName = clPost.FoundViruses[0].VirusName;
+                bot.postMessageToChannel('general', "The file [" + file_name + "] has WebsiteThreatType [" + threatType + "] and VirusName [" + virusName + "]. SecBot will delete the file.");
                 //To log the name of the user and file name in a csv file
                 await createReport(file_name,file);
                 //To delete the image if it contains virus
@@ -129,7 +130,7 @@ async function fileCheck(file, user_id, file_name, filetype, permalink, callback
 function cloudMersiveScan(user_id, file, file_name, permalink, isImage){
         //Changing file name according to URL format
         fileName = file_name.toLowerCase();
-        fileName1 = fileName.replace(" ", "_");
+        fileName1 = fileName.replace(/[^a-z0-9-.]/g, "_")
 
         //URL link to upload on CloudMersive API
         linkArray = permalink.split('/')
@@ -166,7 +167,7 @@ function cloudMersiveScan(user_id, file, file_name, permalink, isImage){
 function inappropriateCheck(user_id, file, file_name, permalink){
         //Changing file name according to URL format
         fileName = file_name.toLowerCase();
-        fileName1 = fileName.replace(" ", "_");
+	fileName1 = fileName.replace(/[^a-z0-9-.]/g, "_")
 
         //URL link to upload on ModerateContent API
         linkArray = permalink.split('/')
@@ -192,7 +193,6 @@ function inappropriateCheck(user_id, file, file_name, permalink){
 
 //To report user name and file name if a threshold is reached
 async function report(){
-
         const count = await totalEntries();
         if(count >= threshold){
                 const response_res = await reportLogs();
