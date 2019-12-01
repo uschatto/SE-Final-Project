@@ -3,6 +3,14 @@
 Our Bot is deployed on AWS EC2 instance and is up and running.
 
 ## DEPLOYMENT SCRIPTS
+
+**Setting Up Ansible:**
+
+Ansible can be installed using the following commands:
+- sudo apt-add-repository ppa:ansible/ansible
+- sudo apt update
+- sudo apt install ansible
+
 The [yaml playbook](https://github.ncsu.edu/csc510-fall2019/CSC510-8/blob/master/Milestone4/INITIAL_CONFIGURATION.yml) is used to fully provision and configure a remote environment for our bot. The playbook will do the following tasks :
 - Install nodejs
 - Install forever
