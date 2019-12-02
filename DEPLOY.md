@@ -54,7 +54,7 @@ Secbot has already been invited to the channel. Doing @secbot is not needed.
 
 #### USECASE 1: Check if a file is corrupted
 ```
-- Upload a file to the channel. 
+- Upload a file to the channel from local file system. 
 - Wait for the bot to respond with the message 'Scanning complete. File <filename> safe to download' to download and view the file. 
 - If the file contains virus, the Bot will respond with the message, 'The file <file-name> has WebsiteThreatType <threat-type> and VirusName <virus-name>.SecBot will delete the file.' 
 - The bot will go on to delete the file.
@@ -63,7 +63,7 @@ Secbot has already been invited to the channel. Doing @secbot is not needed.
 #### USECASE 2: Check if an image is inappropriate
 ```
 - If we reach this step, we can guarantee that the image is virus protected.
-- Upload an image to the channel.Note the image has to be one of these types - "jpeg","jpg","png","bpm","gif","webp" .
+- Upload an image to the channel from the local file system.Note the image has to be one of these types - "jpeg","jpg","png","bpm","gif","webp" .
 - Wait for the bot to respond with the message 'Scanning complete. Image <imagename> safe to download' to download and view the file. 
 - If the image is inappropriate, the Bot will respond with the message, 'The image <imagename> is inappropriate. SecBot will delete the image. 
 - The bot will go on to delete the image.
@@ -87,6 +87,20 @@ Secbot has already been invited to the channel. Doing @secbot is not needed.
 ## OVERVIEW OF OUR FINAL CODE
 The [bot.js](https://github.ncsu.edu/csc510-fall2019/CSC510-8/blob/master/Milestone4/bot.js) is the main code which will take care of all the usecases.The basic overview is :
 
-- Whenever an user uploads anything on the slack channel, bot checks if it is a file/image and sends to the CloudMersive API to check if it contains any virus.Bot will parse the response from the API and if it finds a virus, it will log into the database, check if a threshold is reached for the report (if yes it will send a report to the IT team and database will be cleared). It will then delete the file from the channel with the message "The file <file-name> has WebsiteThreatType <threat-type> and VirusName <virus-name>.SecBot will delete the file". If no virus is found then it will send a message "Scanning Complete.File <file-name> safe to download."
+- Whenever an user uploads anything on the slack channel from the local file system, bot checks if it is a file/image and sends to the CloudMersive API to check if it contains any virus.Bot will parse the response from the API and if it finds a virus, it will log into the database, check if a threshold is reached for the report (if yes it will send a report to the IT team and database will be cleared). It will then delete the file from the channel with the message "The file <file-name> has WebsiteThreatType <threat-type> and VirusName <virus-name>.SecBot will delete the file". If no virus is found then it will send a message "Scanning Complete.File <file-name> safe to download."
   
 - If the file/image does not have virus, then the bot checks if its an image and sends it to ModerateContent API for checking any inappropriate content. Bot will parse the response from the API and if inappropriate content is found , then it will delete the file from the channel with the message "The image <image-name> is inappropriate.SecBot will delete the file." It will send an email to the HR team. If the image is appropriate , a message will be sent to the channel "Scanning complete. Image <image-name> safe to download."
+  
+## CONTINUOUS INTEGRATION SERVER
+
+- Jenkins server is set up and github integration plugin is added to trigger build for our bot when a commit is made.
+
+- CI testing is done using Selenium testing and the respective shell commands are also configured in the Jenkins server job.
+
+**Set Up for Selenium Testing**
+
+- Install Java
+- Download the chromedriver, selenium jar files
+- Run the selenium testing via the below commands : 
+	- javac -cp "/usr/share/java/junit4.jar:/home/vagrant/libs_for_selenium/selenium-server-standalone-3.141.59.jar" slackintegration/secbot.java
+	- java -cp "/usr/share/java/junit4.jar:/home/vagrant/libs_for_selenium/selenium-server-standalone-3.141.59.jar:." slackintegration/secbot
