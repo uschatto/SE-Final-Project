@@ -23,6 +23,7 @@ The [yaml playbook](https://github.ncsu.edu/csc510-fall2019/CSC510-8/blob/master
 - Set Environment variables for API keys,gmail passwords,database credentials,threshold value,workspace URL
 - Start the bot with forever
 
+[Screencast](https://drive.google.com/file/d/13Ovh_LjDCxtMtnHFpOpHTf8Q5O4mCtyG/view?usp=sharing) showing the deployment script successfully running.
 
 ## INSTRUCTIONS FOR ACCEPTANCE TESTING
 We have deployed our SecBot in the following Slack [channel](https://thencsu.slack.com). The users and their credentials that can be used to login to the channel are given below,
