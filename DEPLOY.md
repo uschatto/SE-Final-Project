@@ -97,6 +97,8 @@ The [bot.js](https://github.ncsu.edu/csc510-fall2019/CSC510-8/blob/master/Milest
 
 - CI testing is done using Selenium testing and the respective shell commands are also configured in the Jenkins server job.
 
+- This is the link for the [screencast](https://drive.google.com/file/d/1sa_67aB_csmgHNcvsUO3ru7ZOlRVK5e_/view?usp=sharing) showing the Jenkins Job.
+
 **Set Up for Selenium Testing**
 
 - Install Java
