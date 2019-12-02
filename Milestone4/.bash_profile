@@ -1,0 +1,12 @@
+export SLACK_ACCESS_TOKEN=xoxp-775095895552-762319380354-790210292867-2bde49fdd0f20583f8d4be51fcf6017a;
+export SLACK_BOT_TOKEN=xoxb-775095895552-803537507767-5iFtNP9XcjP8STVpPDExiDvp;
+export GMAIL_PASSWORD='secbot1234';
+export APIKEY='4a34d95f0b19514e411607b4644d72b7';
+export URLSCANAPIKEY='a0a0cb9c-3451-40c9-a56a-f771580de063';
+export DB_USER='root';
+export DB_PASS='secbot123';
+export threshold=3;
+export CHROMEDRIVER='/home/vagrant/chromedriver'
+export SELENIUM_USER_EMAIL='secbotisthebest123@gmail.com'
+export SELENIUM_USER_PASSWORD='dundermifflin123'
+export SLACK_WORKSPACE_URL='https://thencsu.slack.com'
