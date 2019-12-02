@@ -20,7 +20,7 @@ public class secbot
         public static WebDriver driver = null;
         public static void main(String[] args) throws InterruptedException
         {
-                //Setting the location of chromedriver
+                //Setting the location of chromedriver and headless for jenkins
                 ChromeOptions chromeOptions = new ChromeOptions();
                 chromeOptions.addArguments("--headless");
                 chromeOptions.addArguments("--remote-debugging-port=9222");
