@@ -95,6 +95,7 @@ The [bot.js](https://github.ncsu.edu/csc510-fall2019/CSC510-8/blob/master/Milest
   
 ## CONTINUOUS INTEGRATION SERVER
 
+- We've used [this repository](https://github.com/CSC-510/Jenkins-Ansible) to setup Jenkins server.
 - Jenkins server is set up and github integration plugin is added to trigger build for our bot when a commit is made.
 
 - CI testing is done using Selenium testing and the respective shell commands are also configured in the Jenkins server job.
