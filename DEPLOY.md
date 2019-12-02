@@ -58,6 +58,8 @@ Secbot has already been invited to the channel. Doing @secbot is not needed.
 - Wait for the bot to respond with the message 'Scanning complete. File <filename> safe to download' to download and view the file. 
 - If the file contains virus, the Bot will respond with the message, 'The file <file-name> has WebsiteThreatType <threat-type> and VirusName <virus-name>.SecBot will delete the file.' 
 - The bot will go on to delete the file.
+
+Note: Since this is a free-tier API, please upload files smaller than 4MB.
 ```
   
 #### USECASE 2: Check if an image is inappropriate
