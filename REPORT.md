@@ -29,7 +29,7 @@ responsibility that we try to achieve via our bot. By automating the identificat
 
 ### SCREENSHOTS
 
-* Use Case 1: File/Image is corrupted or not*
+* Use Case 1: File/Image is corrupted or not
 
 After uploading normal file
 ![NORAML 1](https://media.github.ncsu.edu/user/12215/files/19ecd200-1aa8-11ea-8d8f-1eac6b326ff1)
@@ -39,7 +39,7 @@ After uploading corrupted file
 
 <br>
 
-* Use Case 2: Image is inappropriate*
+* Use Case 2: Image is inappropriate
 
 After uploading normal image
 ![NORMAL IMAGE 2](https://media.github.ncsu.edu/user/12215/files/ea8a9500-1aa8-11ea-812a-2d3dfb3a7097)
@@ -50,7 +50,7 @@ After uploading inappropriate image
 
 <br>
 
-* Use Case 3: Reporting*
+* Use Case 3: Reporting
 
 For Corrupted file
 ![IMAGE EMAIL](https://media.github.ncsu.edu/user/12215/files/2aea1300-1aa9-11ea-99ef-65962e374a54)
