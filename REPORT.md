@@ -60,8 +60,23 @@ For Corrupted file
 For Inapproriate Image
 ![INAPPROPRIATE](https://media.github.ncsu.edu/user/12215/files/33dae480-1aa9-11ea-8502-68171a0aa4bd)
 
-## Your reflection on the development process and project.
+##  YOUR REFLECTION ON THE DEVELOPMENT PROCESS AND PROJECT
+In this semester long project, we were asked to build a file bot to address some software engineering issue. We were fortunate enough to have gotten a chance to work on new technologies and tools during the course of this project. 
+Slack is now the most popular and fastest growing instant messaging system. Clearly integrating our file bot with Slack became our preferred choice. The development process for this project was divided into 4 different milestones: 
 
+We started our project journey with the milestone design where we needed to come up with one software engineering problem and the possible solution by developing a slack bot application. After brainstorming for a couple of days and discussions with the professor, we decided to go ahead with the topic "Making the slack channel virus free and inappropriate content free".
+
+For milestone-1 design, we described the problem statement for a bot along with the architecture design that we were planning to use for the development process. We chose to use Nodejs as the technology for our project. During this phase of the milestone, we got introduced to wireframes and storyboards which helped us and the teaching staff visualize our project idea in a better manner.
+
+For milestone-2 bot, we came up with the implementation logic for bot where we wrote the business logic of the application and created mock response using nock module. We also worked on Selenium to automate our slack workspace testing without the need of any manual intervention. 
+
+In milestone-3 Process, we implemented the bot by integrating it with the actual APIs i.e. CloudMersive, ModerateContent and Gmail API. One of the major challenges of this milestone was to find a correct API to do URL scanning to detect virus in the uploaded files and images. After having several email conversations with two API support teams we finalised on one and went ahead with the implementation. This time we removed the mock data and parsed the actual response sent by the API and delivered data accordingly.
+
+For milestone-4 Deploy, we deployed the application on Amazon EC-2 to make the bot run forever. We used ansible server script to deploy this application along with all the dependent packages required to make bot run on Amazon EC2. Our ansible script also created a mysql database and a table for our bot to create entries after corrupted file/image uploads. 
+
+To sum it up, it has been a great journey with a lot of ups and downs and a lot of learnings during each milestone of this project. We made use of agile methodology which proved to be quite helpful for understanding the requirements at early stages. Meeting on a regular basis helped us in reducing the errors and defects which might have impacted the project milestones at later stages. We used pair programming during the coding phase of our project. It helped us in improving the quality of the code and eliminating the bugs/defects which might have got neglected had there been only one developer working on that task.
+
+We felt that each member in this project had the flexibility of putting their idea upfront and taking the lead to make it work. We had the opportunity to rotate roles and experience a development process from every perspective of an end to end development process.
 
 ## LIMITATIONS AND FUTURE WORK
 The following are some of the features that can be added to out bot:
